@@ -1,0 +1,370 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+import { useWasteData } from "@/context/WasteDataContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type TimePeriod = "day" | "week" | "month" | "quarter" | "year";
+
+const SummaryCharts = () => {
+  const { wasteData } = useWasteData();
+  const [period1, setPeriod1] = useState<TimePeriod>("day");
+  const [period2, setPeriod2] = useState<TimePeriod>("day");
+  const [period3, setPeriod3] = useState<TimePeriod>("day");
+
+  // Methane Emission Reduction (kg CO₂e) = ((Total Waste Collected (kg)/1000)*(0.6*0.5))*28
+  const calculateMethaneReduction = (totalWaste: number) => {
+    return Math.round(((totalWaste / 1000) * (0.6 * 0.5)) * 28);
+  };
+
+  const groupDataByPeriod = (period: TimePeriod) => {
+    if (period === "day") {
+      return wasteData.map((row) => ({
+        date: row.date.split("-")[0] + " " + row.date.split("-")[1],
+        totalWaste: row.totalWaste,
+        recycling: row.recycling,
+        composted: row.composted,
+        diverted: row.divertedFromLandfill,
+        residual: row.residualToLandfill,
+        landfillDiversionRate: row.landfillDiversionRate,
+        methaneReduction: calculateMethaneReduction(row.totalWaste),
+      }));
+    }
+
+    const groupedData: { [key: string]: any } = {};
+
+    wasteData.forEach((row) => {
+      const dateParts = row.date.split("-");
+      const day = parseInt(dateParts[0]);
+      const month = dateParts[1];
+      const year = dateParts[2] || "2024";
+
+      let groupKey = "";
+      if (period === "week") {
+        const weekNum = Math.ceil(day / 7);
+        groupKey = `W${weekNum} ${month}`;
+      } else if (period === "month") {
+        groupKey = `${month} ${year}`;
+      } else if (period === "quarter") {
+        const monthIndex = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].indexOf(month);
+        const quarter = Math.floor(monthIndex / 3) + 1;
+        groupKey = `Q${quarter} ${year}`;
+      } else if (period === "year") {
+        groupKey = year;
+      }
+
+      if (!groupedData[groupKey]) {
+        groupedData[groupKey] = {
+          date: groupKey,
+          totalWaste: 0,
+          recycling: 0,
+          composted: 0,
+          diverted: 0,
+          residual: 0,
+          landfillDiversionRate: 0,
+          methaneReduction: 0,
+          count: 0,
+        };
+      }
+
+      groupedData[groupKey].totalWaste += row.totalWaste;
+      groupedData[groupKey].recycling += row.recycling;
+      groupedData[groupKey].composted += row.composted;
+      groupedData[groupKey].diverted += row.divertedFromLandfill;
+      groupedData[groupKey].residual += row.residualToLandfill;
+      groupedData[groupKey].landfillDiversionRate += row.landfillDiversionRate;
+      groupedData[groupKey].count += 1;
+    });
+
+    return Object.values(groupedData).map((group: any) => ({
+      ...group,
+      landfillDiversionRate: Math.round(group.landfillDiversionRate / group.count),
+      methaneReduction: calculateMethaneReduction(group.totalWaste),
+    }));
+  };
+
+  const chartData1 = groupDataByPeriod(period1);
+  const chartData2 = groupDataByPeriod(period2);
+  const chartData3 = groupDataByPeriod(period3);
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl">
+          <p className="text-sm font-medium text-foreground mb-2">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-muted-foreground">{entry.name}:</span>
+              <span className="font-medium" style={{ color: entry.color }}>
+                {entry.value} {entry.name.includes("Rate") ? "%" : "kg"}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const TimePeriodDropdown = ({ value, onChange }: { value: TimePeriod; onChange: (val: TimePeriod) => void }) => (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-28 h-8 text-xs bg-secondary/50 border-border">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="bg-card border-border">
+        <SelectItem value="day">Day</SelectItem>
+        <SelectItem value="week">Week</SelectItem>
+        <SelectItem value="month">Month</SelectItem>
+        <SelectItem value="quarter">Quarter</SelectItem>
+        <SelectItem value="year">Year</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mb-8 space-y-6"
+    >
+      {/* Chart 1: Total Waste, Recycling, Composted - Full Width */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="chart-container w-full p-3 sm:p-4 md:p-6"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground">
+            Waste Collection & Processing
+          </h3>
+          <TimePeriodDropdown value={period1} onChange={setPeriod1} />
+        </div>
+        <div className="h-48 sm:h-60 md:h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData1} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={false}
+                interval="preserveStartEnd"
+                angle={-45}
+                textAnchor="end"
+                height={50}
+              />
+              <YAxis
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={false}
+                width={35}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
+                iconType="circle"
+                iconSize={6}
+                layout="horizontal"
+                align="center"
+                verticalAlign="bottom"
+              />
+              <Line
+                type="monotone"
+                dataKey="totalWaste"
+                name="Total Waste"
+                stroke="hsl(160, 84%, 39%)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="recycling"
+                name="Recycling"
+                stroke="hsl(340, 82%, 52%)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="composted"
+                name="Composted"
+                stroke="hsl(45, 93%, 58%)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
+
+      {/* Chart 2: Landfill Metrics - Full Width */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+        className="chart-container w-full p-3 sm:p-4 md:p-6"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground">
+            Landfill Metrics
+          </h3>
+          <TimePeriodDropdown value={period2} onChange={setPeriod2} />
+        </div>
+        <div className="h-48 sm:h-60 md:h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData2} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={false}
+                interval="preserveStartEnd"
+                angle={-45}
+                textAnchor="end"
+                height={50}
+              />
+              <YAxis
+                yAxisId="left"
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={false}
+                width={35}
+              />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={false}
+                domain={[0, 100]}
+                width={30}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
+                iconType="circle"
+                iconSize={6}
+                layout="horizontal"
+                align="center"
+                verticalAlign="bottom"
+              />
+              <Line
+                type="monotone"
+                dataKey="diverted"
+                name="Diverted"
+                stroke="hsl(220, 70%, 55%)"
+                strokeWidth={2}
+                yAxisId="left"
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="residual"
+                name="Residual"
+                stroke="hsl(0, 65%, 50%)"
+                strokeWidth={2}
+                yAxisId="left"
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="landfillDiversionRate"
+                name="Diversion Rate (%)"
+                stroke="hsl(170, 70%, 45%)"
+                strokeWidth={2}
+                yAxisId="right"
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
+
+      {/* Chart 3: Methane Emission Reduction - Full Width */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3 }}
+        className="chart-container w-full p-3 sm:p-4 md:p-6"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground">
+            Methane Emission Reduction
+          </h3>
+          <TimePeriodDropdown value={period3} onChange={setPeriod3} />
+        </div>
+        <div className="h-48 sm:h-60 md:h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData3} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={false}
+                interval="preserveStartEnd"
+                angle={-45}
+                textAnchor="end"
+                height={50}
+              />
+              <YAxis
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                axisLine={{ stroke: "hsl(var(--border))" }}
+                tickLine={false}
+                width={35}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
+                iconType="circle"
+                iconSize={6}
+                layout="horizontal"
+                align="center"
+                verticalAlign="bottom"
+              />
+              <Line
+                type="monotone"
+                dataKey="methaneReduction"
+                name="Methane Reduction (kg CO₂e)"
+                stroke="hsl(199, 89%, 48%)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 0 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default SummaryCharts;
