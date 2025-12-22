@@ -33,7 +33,7 @@ const DashboardHeader = () => {
         className="flex items-center justify-center mb-6 sm:mb-6 w-full"
       >
         <div className="grid grid-cols-2 sm:grid-cols-4 items-center justify-items-center gap-3 sm:gap-4 md:gap-6 w-full bg-white/90 dark:bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5">
-          <div className="flex items-center justify-center h-12 sm:h-12 md:h-16 lg:h-20 w-full">
+          <div className="flex items-center justify-center h-12 sm:h-12 md:h-16 lg:h-20 w-[60%]">
             <img src={SBIFoundation} alt="SBI Foundation" className="h-full w-auto object-contain" />
           </div>
           <div className="flex items-center justify-center h-12 sm:h-12 md:h-16 lg:h-20 w-full">
@@ -59,9 +59,10 @@ const DashboardHeader = () => {
             <Recycle className="w-5 h-5 sm:w-8 sm:h-8 text-primary" />
           </motion.div>
           <div>
-            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground leading-tight mb-2">
               SBIF CONSERW: Waste No More in Ayodhya
             </h1>
+            <p >IT Dashboard</p>
           </div>
         </div>
 
