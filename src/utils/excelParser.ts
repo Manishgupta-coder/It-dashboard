@@ -155,20 +155,20 @@ export const calculateDerivedMetrics = (row: any): Partial<WasteDataRow> => {
   // 4. Residual Waste to Landfill (kg) = Total Waste Collected - Waste Diverted from Landfill
   const residualToLandfill = residualToLandfillExcel || (totalWaste - divertedFromLandfill);
 
-  // 5. Recycling Efficiency (%) = (Mass of usable recycled output / Mass of recyclable material input) * 100
-  // If recyclableInput and recycledOutput are available, use them; otherwise use recycling/totalWaste
+  // 5. Recycling Efficiency (%) = (Mass of usable recycled output / Waste sent for Recycling) * 100
+  // Mass of Usable Recycled output = Waste sent for Recycling (kg)
   const recyclingEfficiency = recyclingEfficiencyExcel || 
-    (recyclableInput > 0 ? Math.round((recycledOutput / recyclableInput) * 100) : 
-    (totalWaste > 0 ? Math.round((recycling / totalWaste) * 100) : 0));
+    (recycling > 0 ? Math.round((recycling / recycling) * 100) : 0);
 
   // 6. Landfill Diversion Rate (%) = (Waste Diverted from Landfill / Total Waste Generated) * 100
   const landfillDiversionRate = landfillDiversionRateExcel || 
     (totalWaste > 0 ? Math.round((divertedFromLandfill / totalWaste) * 100) : 0);
 
   // 7. Segregation Efficiency (%) = (Correctly Segregated Waste / Total Waste Generated) * 100
+  // Correctly Segregated Waste (kg) = Total Waste Collected (kg) = recycling + composted
+  const totalWasteCollected = recycling + wasteComposted;
   const segregationEfficiency = segregationEfficiencyExcel || 
-    (correctlySegregated > 0 && totalWaste > 0 ? Math.round((correctlySegregated / totalWaste) * 100) : 
-    (totalWaste > 0 ? Math.round(((dryWaste + wetWaste) / totalWaste) * 100) : 0));
+    (totalWaste > 0 ? Math.round((totalWasteCollected / totalWaste) * 100) : 0);
 
   return {
     totalWaste,

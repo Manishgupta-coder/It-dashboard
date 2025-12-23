@@ -426,16 +426,16 @@ export const calculateTotals = (data: WasteDataRow[]) => {
   // Methane Emission Reduction (kg CO₂e) = ((Total Waste Collected (kg)/1000)*(0.6*0.5))*28
   const methaneReduction = Math.round(((totalWaste / 1000) * (0.6 * 0.5)) * 28);
   
-  // Recycling Efficiency (%) = (Mass of usable recycled output / Mass of recyclable material input) × 100
-  // Recyclable material input = Dry Waste
-  const recyclingEfficiency = totals.dryWasteSum > 0 ? Math.round((totals.recycling / totals.dryWasteSum) * 100) : 0;
+  // Recycling Efficiency (%) = (Mass of usable recycled output / Waste sent for Recycling) × 100
+  // Mass of Usable Recycled output = Waste sent for Recycling (kg)
+  const recyclingEfficiency = totals.recycling > 0 ? Math.round((totals.recycling / totals.recycling) * 100) : 0;
   
   // Landfill Diversion Rate (%) = (Waste Diverted from Landfill / Total Waste) × 100
   const landfillDiversionRate = totalWaste > 0 ? Math.round((diverted / totalWaste) * 100) : 0;
   
-  // Segregation Efficiency (%) = (Correctly Segregated Waste / Total Waste) × 100
-  // Assuming correctly segregated = dry waste + wet waste
-  const segregationEfficiency = totalWaste > 0 ? Math.round(((totals.dryWasteSum + totals.wetWasteSum) / totalWaste) * 100) : 0;
+  // Segregation Efficiency (%) = (Correctly Segregated Waste / Total Waste Generated) × 100
+  // Correctly Segregated Waste (kg) = Total Waste Collected (kg)
+  const segregationEfficiency = totals.totalWasteSum > 0 ? Math.round((totalWaste / totals.totalWasteSum) * 100) : 0;
 
   return {
     ...totals,
