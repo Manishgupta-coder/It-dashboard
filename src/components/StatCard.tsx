@@ -52,7 +52,7 @@ const StatCard = ({ title, value, unit, icon: Icon, color, delay = 0 }: StatCard
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, delay }}
       whileHover={{ scale: 1.02, y: -4 }}
-      className="stat-card group p-3 sm:p-4 md:p-5 relative overflow-hidden"
+      className="stat-card group p-4 sm:p-4 md:p-5 relative overflow-hidden"
     >
       {/* Background gradient decoration */}
       <div 
@@ -60,10 +60,10 @@ const StatCard = ({ title, value, unit, icon: Icon, color, delay = 0 }: StatCard
         style={{ background: `radial-gradient(circle, ${color}, transparent)` }}
       />
       
-      <div className="relative z-10 flex items-start gap-3">
+      <div className="relative z-10 flex items-center gap-3 sm:gap-3">
         {/* Circular progress indicator with icon */}
         <div className="relative flex-shrink-0">
-          <svg className="w-14 h-14 sm:w-16 sm:h-16 -rotate-90" viewBox="0 0 60 60">
+          <svg className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 -rotate-90" viewBox="0 0 60 60">
             {/* Background circle */}
             <circle
               cx="30"
@@ -97,20 +97,20 @@ const StatCard = ({ title, value, unit, icon: Icon, color, delay = 0 }: StatCard
               style={{ backgroundColor: `${color}15` }}
               whileHover={{ scale: 1.1 }}
             >
-              <Icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color }} />
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" style={{ color }} />
             </motion.div>
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="text-muted-foreground text-xs sm:text-sm mb-1 line-clamp-2 font-medium leading-tight">{title}</p>
+          <p className="text-muted-foreground text-[11px] sm:text-xs md:text-sm mb-1 line-clamp-2 font-medium leading-tight">{title}</p>
           
           <div className="flex items-baseline gap-1 flex-wrap">
-            <span className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+            <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
               <AnimatedNumber value={value} delay={delay + 0.3} />
             </span>
-            <span className="text-muted-foreground text-xs sm:text-sm font-medium">{unit}</span>
+            <span className="text-muted-foreground text-[10px] sm:text-xs md:text-sm font-medium">{unit}</span>
           </div>
         </div>
       </div>
