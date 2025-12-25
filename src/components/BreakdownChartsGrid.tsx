@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PieChart as PieChartIcon } from "lucide-react";
 
 const COLORS = [
   "hsl(160, 84%, 39%)",
@@ -124,8 +125,9 @@ const BreakdownChartsGrid = () => {
       transition={{ duration: 0.5 }}
       className="chart-container p-3 sm:p-4 md:p-6"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2">
-        <h3 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">
+      <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2">
+        <h3 className="text-base sm:text-lg md:text-xl font-semibold text-foreground flex items-center gap-2">
+          <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           Dry Waste Breakdown
         </h3>
         <Select value={timePeriod} onValueChange={(val) => setTimePeriod(val as TimePeriod)}>

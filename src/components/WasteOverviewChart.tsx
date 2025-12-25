@@ -11,7 +11,7 @@ import {
   Legend,
   Cell,
 } from "recharts";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, BarChart3 } from "lucide-react";
 import { getChartData } from "@/data/wasteData";
 import { useWasteData } from "@/context/WasteDataContext";
 
@@ -198,17 +198,12 @@ const WasteOverviewChart = () => {
       <div className="absolute bottom-0 right-0 w-20 h-20 border-r-4 border-b-4 border-primary/20 rounded-br-2xl" />
 
       {/* Header */}
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-        <div className="flex items-center gap-3">
-          {/* Chart icon */}
-          <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-            <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
+      <div className="relative z-10 flex items-center justify-between mb-4 gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           <div>
             <h3 className="text-sm sm:text-base md:text-xl font-bold text-foreground">Waste Category Trends</h3>
-            <p className="text-xs text-muted-foreground">Material breakdown by category</p>
+            <p className="text-xs text-muted-foreground hidden sm:block">Material breakdown by category</p>
           </div>
         </div>
         

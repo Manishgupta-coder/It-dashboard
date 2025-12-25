@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ChevronUp, ChevronDown, Search } from "lucide-react";
+import { ChevronUp, ChevronDown, Search, Table } from "lucide-react";
 import { WasteDataRow } from "@/data/wasteData";
 import { useWasteData } from "@/context/WasteDataContext";
 
@@ -95,8 +95,11 @@ const WasteDataTable = () => {
       transition={{ duration: 0.6, delay: 0.4 }}
       className="chart-container p-3 sm:p-4 md:p-6"
     >
-      <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-4 flex-wrap">
-        <h3 className="text-sm sm:text-base md:text-xl font-semibold text-foreground whitespace-nowrap">Waste Collection Data</h3>
+      <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-4">
+        <h3 className="text-sm sm:text-base md:text-xl font-semibold text-foreground whitespace-nowrap flex items-center gap-2">
+          <Table className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          Waste Collection Data
+        </h3>
 
         <div className="relative flex-shrink-0">
           <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />

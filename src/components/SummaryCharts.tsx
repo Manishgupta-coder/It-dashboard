@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Factory, Trash, Flame } from "lucide-react";
 
 type TimePeriod = "day" | "week" | "month" | "quarter" | "year";
 
@@ -153,8 +154,9 @@ const SummaryCharts = () => {
         transition={{ delay: 0.1 }}
         className="chart-container w-full p-3 sm:p-4 md:p-6"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
-          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground">
+        <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
+            <Factory className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             Waste Collection & Processing
           </h3>
           <TimePeriodDropdown value={period1} onChange={setPeriod1} />
@@ -238,13 +240,15 @@ const SummaryCharts = () => {
         transition={{ delay: 0.2 }}
         className="chart-container w-full p-3 sm:p-4 md:p-6"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
-          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground">
+        <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
+            <Trash className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             Landfill Metrics
           </h3>
           <TimePeriodDropdown value={period2} onChange={setPeriod2} />
         </div>
-        <div className="h-48 sm:h-60 md:h-72 bar-chart-shadow">
+        <div className="h-48 sm:h-60 md:h-72 bar-chart-shadow overflow-x-auto">
+          <div className="min-w-[400px] h-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData2} margin={{ top: 5, right: 35, left: 0, bottom: 5 }}>
               <defs>
@@ -326,6 +330,7 @@ const SummaryCharts = () => {
               />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </div>
       </motion.div>
 
@@ -336,8 +341,9 @@ const SummaryCharts = () => {
         transition={{ delay: 0.3 }}
         className="chart-container w-full p-3 sm:p-4 md:p-6"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 sm:mb-4">
-          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground">
+        <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+          <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground flex items-center gap-2">
+            <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             Methane Emission Reduction
           </h3>
           <TimePeriodDropdown value={period3} onChange={setPeriod3} />
