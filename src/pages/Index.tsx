@@ -18,6 +18,7 @@ import WasteOverviewChart from "@/components/WasteOverviewChart";
 import BreakdownChartsGrid from "@/components/BreakdownChartsGrid";
 import WasteDataTable from "@/components/WasteDataTable";
 import Footer from "@/components/Footer";
+import AnimatedTruck from "@/components/AnimatedTruck";
 import { calculateTotals } from "@/data/wasteData";
 import { useWasteData } from "@/context/WasteDataContext";
 
@@ -125,17 +126,23 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Hero gradient background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hero-gradient" />
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 right-10 w-64 h-64 bg-chart-glass/6 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       <main className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <DashboardHeader />
+        
+        {/* Animated Truck Banner */}
+        <AnimatedTruck />
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
-            <StatCard key={stat.title} {...stat} delay={index * 0.1} />
+            <StatCard key={stat.title} {...stat} delay={index * 0.08} />
           ))}
         </div>
 

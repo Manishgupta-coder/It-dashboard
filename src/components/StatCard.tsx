@@ -36,45 +36,96 @@ const AnimatedNumber = ({ value, delay }: { value: number; delay: number }) => {
   return <motion.span ref={ref}>{display}</motion.span>;
 };
 
-const StatCard = ({ title, value, unit, icon: Icon, trend, color, delay = 0 }: StatCardProps) => {
+const StatCard = ({ title, value, unit, icon: Icon, color, delay = 0 }: StatCardProps) => {
+  // Calculate a percentage for the circular progress (mock based on some reasonable max)
+  const maxValues: { [key: string]: number } = {
+    "kg": 50000,
+    "%": 100,
+    "kg CO₂e": 10000,
+  };
+  const maxVal = maxValues[unit] || 10000;
+  const percentage = Math.min((value / maxVal) * 100, 100);
+  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, delay }}
-      className="stat-card group p-3 sm:p-4 md:p-6"
+      whileHover={{ scale: 1.02, y: -4 }}
+      className="stat-card group p-3 sm:p-4 md:p-5 relative overflow-hidden"
     >
-      <div className="flex items-start justify-between mb-2 sm:mb-4">
-        <div
-          className="p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-300 group-hover:scale-110"
-          style={{ backgroundColor: `${color}20` }}
-        >
-          <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" style={{ color }} />
+      {/* Background gradient decoration */}
+      <div 
+        className="absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-20 transition-opacity group-hover:opacity-40"
+        style={{ background: `radial-gradient(circle, ${color}, transparent)` }}
+      />
+      
+      <div className="relative z-10 flex items-start gap-3">
+        {/* Circular progress indicator with icon */}
+        <div className="relative flex-shrink-0">
+          <svg className="w-14 h-14 sm:w-16 sm:h-16 -rotate-90" viewBox="0 0 60 60">
+            {/* Background circle */}
+            <circle
+              cx="30"
+              cy="30"
+              r="26"
+              fill="none"
+              stroke={`${color}20`}
+              strokeWidth="5"
+            />
+            {/* Progress circle */}
+            <motion.circle
+              cx="30"
+              cy="30"
+              r="26"
+              fill="none"
+              stroke={color}
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 26}
+              initial={{ strokeDashoffset: 2 * Math.PI * 26 }}
+              animate={{ strokeDashoffset: 2 * Math.PI * 26 * (1 - percentage / 100) }}
+              transition={{ duration: 1.5, delay: delay + 0.3, ease: "easeOut" }}
+            />
+          </svg>
+          {/* Icon in center */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <motion.div
+              className="p-2 rounded-full"
+              style={{ backgroundColor: `${color}15` }}
+              whileHover={{ scale: 1.1 }}
+            >
+              <Icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color }} />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p className="text-muted-foreground text-xs sm:text-sm mb-1 line-clamp-2 font-medium leading-tight">{title}</p>
+          
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+              <AnimatedNumber value={value} delay={delay + 0.3} />
+            </span>
+            <span className="text-muted-foreground text-xs sm:text-sm font-medium">{unit}</span>
+          </div>
         </div>
       </div>
 
-      <p className="text-muted-foreground text-xs sm:text-sm mb-1 line-clamp-2">{title}</p>
-
-      <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
-        <span className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
-          <AnimatedNumber value={value} delay={delay + 0.3} />
-        </span>
-        <span className="text-muted-foreground text-xs sm:text-sm">{unit}</span>
-      </div>
-
+      {/* Bottom decorative bar */}
       <motion.div
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 0.8, delay: delay + 0.4 }}
-        className="mt-4 h-1 rounded-full origin-left"
-        style={{ backgroundColor: `${color}40` }}
+        className="absolute bottom-0 left-0 right-0 h-1"
+        style={{ backgroundColor: `${color}30` }}
       >
         <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 0.7 }}
-          transition={{ duration: 1, delay: delay + 0.6 }}
-          className="h-full rounded-full origin-left"
+          className="h-full"
           style={{ backgroundColor: color }}
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 1.2, delay: delay + 0.5, ease: "easeOut" }}
         />
       </motion.div>
     </motion.div>

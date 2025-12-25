@@ -41,12 +41,39 @@ const BreakdownChartsGrid = () => {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
 
   const filteredData = useMemo(() => {
-    if (timePeriod === "day") {
-      return wasteData;
+    if (!wasteData || wasteData.length === 0) return [];
+    
+    const now = new Date();
+    const sortedData = [...wasteData].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    switch (timePeriod) {
+      case "day":
+        // Get the latest day's data
+        return sortedData.slice(0, 1);
+      case "week":
+        // Get last 7 days
+        const weekAgo = new Date(now);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return sortedData.filter(row => new Date(row.date) >= weekAgo);
+      case "month":
+        // Get last 30 days
+        const monthAgo = new Date(now);
+        monthAgo.setDate(monthAgo.getDate() - 30);
+        return sortedData.filter(row => new Date(row.date) >= monthAgo);
+      case "quarter":
+        // Get last 90 days
+        const quarterAgo = new Date(now);
+        quarterAgo.setDate(quarterAgo.getDate() - 90);
+        return sortedData.filter(row => new Date(row.date) >= quarterAgo);
+      case "year":
+        // Get all data (full year)
+        return sortedData;
+      default:
+        return sortedData;
     }
-    return wasteData;
   }, [wasteData, timePeriod]);
-
 
   const plasticData = getPlasticBreakdown(filteredData);
   const paperData = getPaperBreakdown(filteredData);
@@ -69,12 +96,12 @@ const BreakdownChartsGrid = () => {
   };
 
   const charts = [
-    { title: "Plastic", subtitle: "Bags, Bottles & Polythene", data: addOthersToData(plasticData) },
-    { title: "Paper", subtitle: "Paper sub-categories", data: addOthersToData(paperData) },
-    { title: "Glass", subtitle: "Glass grades", data: addOthersToData(glassData) },
-    { title: "Metal", subtitle: "Aluminum & Containers", data: addOthersToData(metalData) },
-    { title: "E-waste", subtitle: "Electronic waste", data: addOthersToData(ewasteData) },
-    { title: "Others", subtitle: "Medicines & Thermometers", data: othersData },
+    { title: "Plastic", data: addOthersToData(plasticData) },
+    { title: "Paper", data: addOthersToData(paperData) },
+    { title: "Glass", data: addOthersToData(glassData) },
+    { title: "Metal", data: addOthersToData(metalData) },
+    { title: "E-waste", data: addOthersToData(ewasteData) },
+    { title: "Others", data: othersData },
   ];
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -126,7 +153,6 @@ const BreakdownChartsGrid = () => {
           >
             <div className="mb-1 sm:mb-2">
               <h4 className="text-xs sm:text-sm font-medium text-foreground">{chart.title}</h4>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">{chart.subtitle}</p>
             </div>
             <div className="h-28 sm:h-32 md:h-40">
               <ResponsiveContainer width="100%" height="100%">
