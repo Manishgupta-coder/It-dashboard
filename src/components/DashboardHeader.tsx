@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Calendar, FileText, Download, Info } from "lucide-react";
+import { Calendar, FileText, Download, Info, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import SBIFoundation from "@/assets/images/SBI-Foundation.png";
 import SBIConserw from "@/assets/images/Sbi-CONSERW.png";
 import Ayodhya from "@/assets/images/Ayodhya.png";
@@ -19,6 +20,7 @@ import {
 
 const DashboardHeader = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -165,9 +167,11 @@ metal, and e-waste in the Ayodhya region.`;
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              disabled={isGeneratingReport}
               onClick={async () => {
                 const element = document.body;
                 try {
+                  setIsGeneratingReport(true);
                   const canvas = await html2canvas(element, {
                     scale: 2,
                     useCORS: true,
@@ -176,19 +180,45 @@ metal, and e-waste in the Ayodhya region.`;
                     windowHeight: document.documentElement.scrollHeight,
                     height: document.documentElement.scrollHeight,
                   });
-                  const link = document.createElement('a');
-                  link.download = `waste-management-report-${format(new Date(), "dd-MMM-yyyy")}.png`;
-                  link.href = canvas.toDataURL('image/png');
-                  link.click();
+                  const imgData = canvas.toDataURL("image/png");
+                  const pdf = new jsPDF({
+                    orientation: "portrait",
+                    unit: "mm",
+                    format: "a4",
+                  });
+                  const pageWidth = pdf.internal.pageSize.getWidth();
+                  const pageHeight = pdf.internal.pageSize.getHeight();
+                  let imgWidth = pageWidth;
+                  let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                  if (imgHeight > pageHeight) {
+                    imgHeight = pageHeight;
+                    imgWidth = (canvas.width * imgHeight) / canvas.height;
+                  }
+
+                  const x = (pageWidth - imgWidth) / 2;
+                  pdf.addImage(imgData, "PNG", x, 0, imgWidth, imgHeight, undefined, "FAST");
+                  pdf.save(`waste-management-report-${format(new Date(), "dd-MMM-yyyy")}.pdf`);
                 } catch (error) {
                   console.error('Error generating report:', error);
+                } finally {
+                  setIsGeneratingReport(false);
                 }
               }}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent-foreground text-xs sm:text-sm font-medium transition-colors"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent-foreground text-xs sm:text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>Report</span>
-              <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              {isGeneratingReport ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span>Report</span>
+                  <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                </>
+              )}
             </motion.button>
           </div>
         </div>

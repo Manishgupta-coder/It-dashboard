@@ -53,8 +53,8 @@ const LandfillMetricsPieChart = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="w-32 h-32 flex-shrink-0">
+      <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="w-32 h-32 sm:w-36 sm:h-36 flex-shrink-0 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -75,12 +75,12 @@ const LandfillMetricsPieChart = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 w-full space-y-2">
           {chartData.map((item, index) => {
             const Icon = item.icon;
             const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : 0;
             return (
-              <div key={index} className="flex items-center justify-between text-xs">
+              <div key={index} className="flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2">
                   <div
                     className="w-2.5 h-2.5 rounded-full"
