@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Calendar, FileText, Download, X, Info } from "lucide-react";
+import { Calendar, FileText, Download, Info } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
+import html2canvas from "html2canvas";
 import SBIFoundation from "@/assets/images/SBI-Foundation.png";
 import SBIConserw from "@/assets/images/Sbi-CONSERW.png";
 import Ayodhya from "@/assets/images/Ayodhya.png";
@@ -164,30 +165,24 @@ metal, and e-waste in the Ayodhya region.`;
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                const reportContent = `Waste Management Report - Ayodhya
-Generated: ${format(new Date(), "dd MMM yyyy, HH:mm")}
-
-Summary Report:
-This report contains the waste collection and segregation data for the Ayodhya region 
-under the SBI CONSERW initiative.
-
-Categories Tracked:
-- Plastic Waste
-- Paper Waste
-- Glass Waste
-- Metal Waste
-- E-Waste
-- Others (Medicines, Thermometers, etc.)
-
-For detailed data, please refer to the dashboard.`;
-                const blob = new Blob([reportContent], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'waste-management-report.txt';
-                a.click();
-                URL.revokeObjectURL(url);
+              onClick={async () => {
+                const element = document.body;
+                try {
+                  const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollY: -window.scrollY,
+                    windowHeight: document.documentElement.scrollHeight,
+                    height: document.documentElement.scrollHeight,
+                  });
+                  const link = document.createElement('a');
+                  link.download = `waste-management-report-${format(new Date(), "dd-MMM-yyyy")}.png`;
+                  link.href = canvas.toDataURL('image/png');
+                  link.click();
+                } catch (error) {
+                  console.error('Error generating report:', error);
+                }
               }}
               className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent-foreground text-xs sm:text-sm font-medium transition-colors"
             >
