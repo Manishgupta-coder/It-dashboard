@@ -195,10 +195,10 @@ export const WasteDataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchData();
     
-    // Auto-refresh every 5 minutes
+    // Auto-refresh once per day (24 hours)
     const interval = setInterval(() => {
       fetchData();
-    }, 5 * 60 * 1000);
+    }, 24 * 60 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);

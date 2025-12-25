@@ -14,7 +14,11 @@ import {
 import DashboardHeader from "@/components/DashboardHeader";
 import StatRow from "@/components/StatRow";
 import DryWasteMethaneSection from "@/components/DryWasteMethaneSection";
+import BreakdownChartsGrid from "@/components/BreakdownChartsGrid";
+import WasteOverviewChart from "@/components/WasteOverviewChart";
 import WasteDataTable from "@/components/WasteDataTable";
+import WasteCollectionPieChart from "@/components/WasteCollectionPieChart";
+import LandfillMetricsPieChart from "@/components/LandfillMetricsPieChart";
 import Footer from "@/components/Footer";
 import AnimatedTruck from "@/components/AnimatedTruck";
 import { calculateTotals } from "@/data/wasteData";
@@ -90,7 +94,25 @@ const Index = () => {
 
         <DryWasteMethaneSection />
 
-        <WasteDataTable />
+        <WasteOverviewChart />
+
+        <div className="my-6 sm:my-8" />
+
+        <BreakdownChartsGrid />
+
+        <div className="my-6 sm:my-8" />
+
+        {/* Two Column Layout: Data Table + Pie Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Left Column: Waste Data Table */}
+          <WasteDataTable />
+          
+          {/* Right Column: Two Pie Charts stacked - matches table height */}
+          <div className="flex flex-col gap-4 sm:gap-6 h-full">
+            <WasteCollectionPieChart />
+            <LandfillMetricsPieChart />
+          </div>
+        </div>
       </main>
 
       <Footer />
