@@ -1,25 +1,26 @@
 import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 import {
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { ChevronDown } from "lucide-react";
 import { getChartData } from "@/data/wasteData";
 import { useWasteData } from "@/context/WasteDataContext";
 
 const categories = [
-  { key: "plastic", label: "Plastic", color: "hsl(340, 82%, 52%)", gradient: "plasticGradient" },
-  { key: "paper", label: "Paper", color: "hsl(45, 93%, 58%)", gradient: "paperGradient" },
-  { key: "glass", label: "Glass", color: "hsl(199, 89%, 48%)", gradient: "glassGradient" },
-  { key: "metal", label: "Metal", color: "hsl(220, 70%, 55%)", gradient: "metalGradient" },
-  { key: "ewaste", label: "E-Waste", color: "hsl(280, 65%, 60%)", gradient: "ewasteGradient" },
-  { key: "others", label: "Others", color: "hsl(15, 80%, 55%)", gradient: "othersGradient" },
+  { key: "plastic", label: "Plastic", color: "hsl(340, 82%, 52%)" },
+  { key: "paper", label: "Paper", color: "hsl(45, 93%, 58%)" },
+  { key: "glass", label: "Glass", color: "hsl(199, 89%, 48%)" },
+  { key: "metal", label: "Metal", color: "hsl(220, 70%, 55%)" },
+  { key: "ewaste", label: "E-Waste", color: "hsl(280, 65%, 60%)" },
+  { key: "others", label: "Others", color: "hsl(15, 80%, 55%)" },
 ];
 
 const timePeriods = [
@@ -45,7 +46,6 @@ const WasteOverviewChart = () => {
       return data;
     }
     
-    // Group data based on time period
     const groupedData: { [key: string]: any } = {};
     
     data.forEach((row, index) => {
@@ -113,12 +113,7 @@ const WasteOverviewChart = () => {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-3 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-4">
-          <div>
-            <h3 className="text-sm sm:text-base md:text-xl font-semibold text-foreground">Waste Category Trends</h3>
-            <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
-              Click categories to filter
-            </p>
-          </div>
+          <h3 className="text-sm sm:text-base md:text-xl font-semibold text-foreground">Waste Category Trends</h3>
           
           {/* Time Period Dropdown */}
           <div className="relative">
@@ -178,21 +173,21 @@ const WasteOverviewChart = () => {
         </div>
       </div>
 
-      <div className="h-[280px] sm:h-[300px] md:h-[350px]">
+      <div className="h-[280px] sm:h-[300px] md:h-[350px] bar-chart-shadow">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 30 }}>
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 30 }}>
             <defs>
               {categories.map((cat) => (
-                <linearGradient key={cat.gradient} id={cat.gradient} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={cat.color} stopOpacity={0.4} />
-                  <stop offset="95%" stopColor={cat.color} stopOpacity={0} />
+                <linearGradient key={`${cat.key}Grad`} id={`${cat.key}Grad`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={cat.color} stopOpacity={1} />
+                  <stop offset="100%" stopColor={cat.color} stopOpacity={0.6} />
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 18%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
             <XAxis
               dataKey="date"
-              stroke="hsl(215, 20%, 55%)"
+              stroke="hsl(var(--muted-foreground))"
               fontSize={9}
               tickLine={false}
               axisLine={false}
@@ -202,29 +197,32 @@ const WasteOverviewChart = () => {
               height={50}
             />
             <YAxis
-              stroke="hsl(215, 20%, 55%)"
+              stroke="hsl(var(--muted-foreground))"
               fontSize={9}
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) => `${value}kg`}
-              width={40}
+              width={50}
             />
             <Tooltip content={<CustomTooltip />} />
+            <Legend
+              wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
+              iconType="rect"
+              iconSize={8}
+            />
             {categories.map((cat) =>
               activeCategories.includes(cat.key) ? (
-                <Area
+                <Bar
                   key={cat.key}
-                  type="monotone"
                   dataKey={cat.key}
                   name={cat.label}
-                  stroke={cat.color}
-                  strokeWidth={2}
-                  fill={`url(#${cat.gradient})`}
+                  fill={`url(#${cat.key}Grad)`}
+                  radius={[2, 2, 0, 0]}
                   animationDuration={800}
                 />
               ) : null
             )}
-          </AreaChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </motion.div>

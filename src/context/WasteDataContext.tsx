@@ -16,6 +16,8 @@ const parseCSVToWasteData = (csvText: string): WasteDataRow[] => {
   const lines = csvText.trim().split('\n');
   const dataRows: WasteDataRow[] = [];
   
+  console.log('Parsing CSV with', lines.length, 'lines');
+  
   // Skip header row, start from line 1
   for (let i = 1; i < lines.length; i++) {
     // Handle CSV parsing with potential quoted values
@@ -35,32 +37,57 @@ const parseCSVToWasteData = (csvText: string): WasteDataRow[] => {
     }
     values.push(current.trim());
 
-    // The Google Sheet has 25 columns (0-24)
-    if (values.length >= 25) {
+    console.log('Row', i, 'has', values.length, 'columns');
+    
+    // Google Sheet columns (0-indexed):
+    // 0: Date
+    // 1: Total Waste Collected (kg)
+    // 2: Dry Waste (kg)
+    // 3: Wet Waste (kg)
+    // 4: Plastic - Bags/Sacks
+    // 5: Plastic - Pet Bottles
+    // 6: Plastic - HDPE Bottles
+    // 7: Plastic - Polythene
+    // 8: Plastic - Others
+    // 9: Paper - Thermocol
+    // 10: Paper - Newspaper
+    // 11: Paper - Cartoon
+    // 12: Paper - Normal Paper
+    // 13: Paper - Cardboard
+    // 14: Paper - Others
+    // 15: Glass - White Grades
+    // 16: Glass - Others
+    // 17: Metal - Aluminum cans
+    // 18: Metal - Food Packing container
+    // 19: Metal - Others
+    // 20: E-waste - Batteries
+    // 21: E-waste - Charger
+    // 22: E-waste - Lighting
+    // 23: E-waste - Others
+    // 24: Others - Expired medicines
+    // 25: Others - Medicines packaging
+    // 26: Others - Thermometers
+    // 27: Others - Others
+    // 28: Waste sent for Recycling (kg)
+    // 29: Waste Composted (kg)
+    // 30: Remarks
+
+    if (values.length >= 30) {
       try {
-        const recycling = parseFloat(values[22]) || 0;
-        const composted = parseFloat(values[23]) || 0;
+        const recycling = parseFloat(values[28]) || 0;
+        const composted = parseFloat(values[29]) || 0;
         const totalWaste = parseFloat(values[1]) || 0;
         const dryWaste = parseFloat(values[2]) || 0;
         const wetWaste = parseFloat(values[3]) || 0;
         
         // Calculate derived metrics
-        // Waste Diverted from Landfill (kg) = Total Waste Collected - (5% of Total Waste Collected)
         const divertedFromLandfill = Math.round(totalWaste - (totalWaste * 0.05));
-        // Residual Waste to Landfill (kg) = Total Waste Collected - Waste Diverted from Landfill
         const residualToLandfill = totalWaste - divertedFromLandfill;
-        // Recycling Efficiency (%) = (Mass of usable recycled output / Waste sent for Recycling) × 100
-        // Mass of Usable Recycled output = Waste sent for Recycling (kg)
         const recyclingEfficiency = recycling > 0 ? Math.round((recycling / recycling) * 100) : 0;
         const landfillDiversionRate = totalWaste > 0 ? Math.round((divertedFromLandfill / totalWaste) * 100) : 0;
-        // Segregation Efficiency (%) = (Correctly Segregated Waste / Total Waste Generated) × 100
-        // Correctly Segregated Waste (kg) = Total Waste Collected (kg)
-        // Total Waste Collected = recycling + composted
         const totalWasteCollected = recycling + composted;
         const segregationEfficiency = totalWaste > 0 ? Math.round((totalWasteCollected / totalWaste) * 100) : 0;
-        // Compost Produced (kg) = 20% of Waste Composted (kg)
         const compostProduced = Math.round(composted * 0.20);
-        // Methane Emission Reduction (kg CO₂e) = ((Total Waste Collected (kg)/1000)*(0.6*0.5))*28
         const methaneReduction = Math.round(((totalWaste / 1000) * (0.6 * 0.5)) * 28);
 
         const row: WasteDataRow = {
@@ -73,29 +100,29 @@ const parseCSVToWasteData = (csvText: string): WasteDataRow[] => {
             petBottles: parseFloat(values[5]) || 0,
             hdpeBottles: parseFloat(values[6]) || 0,
             polythene: parseFloat(values[7]) || 0,
-            thermocol: parseFloat(values[8]) || 0,
+            thermocol: parseFloat(values[9]) || 0, // Thermocol is in paper section but belongs to plastic
           },
           paper: {
-            newspaper: parseFloat(values[9]) || 0,
-            cartoon: parseFloat(values[10]) || 0,
-            normalPaper: parseFloat(values[11]) || 0,
-            cardboard: parseFloat(values[12]) || 0,
+            newspaper: parseFloat(values[10]) || 0,
+            cartoon: parseFloat(values[11]) || 0,
+            normalPaper: parseFloat(values[12]) || 0,
+            cardboard: parseFloat(values[13]) || 0,
           },
-          glass: parseFloat(values[13]) || 0,
+          glass: parseFloat(values[15]) || 0,
           metal: {
-            aluminumCans: parseFloat(values[14]) || 0,
-            foodPackingContainer: parseFloat(values[15]) || 0,
+            aluminumCans: parseFloat(values[17]) || 0,
+            foodPackingContainer: parseFloat(values[18]) || 0,
           },
-          textiles: 0, // Not in sheet
+          textiles: 0,
           ewaste: {
-            batteries: parseFloat(values[16]) || 0,
-            charger: parseFloat(values[17]) || 0,
-            lighting: parseFloat(values[18]) || 0,
+            batteries: parseFloat(values[20]) || 0,
+            charger: parseFloat(values[21]) || 0,
+            lighting: parseFloat(values[22]) || 0,
           },
           others: {
-            expiredMedicines: parseFloat(values[19]) || 0,
-            medicinesPackaging: parseFloat(values[20]) || 0,
-            thermometers: parseFloat(values[21]) || 0,
+            expiredMedicines: parseFloat(values[24]) || 0,
+            medicinesPackaging: parseFloat(values[25]) || 0,
+            thermometers: parseFloat(values[26]) || 0,
           },
           recycling,
           composted,
@@ -106,8 +133,10 @@ const parseCSVToWasteData = (csvText: string): WasteDataRow[] => {
           recyclingEfficiency,
           landfillDiversionRate,
           segregationEfficiency,
-          remarks: values[24] || '',
+          remarks: values[30] || '',
         };
+        
+        console.log('Parsed row:', row.date, 'Remarks:', row.remarks, 'Others:', row.others);
         dataRows.push(row);
       } catch (e) {
         console.error('Error parsing row:', i, e);
@@ -115,6 +144,7 @@ const parseCSVToWasteData = (csvText: string): WasteDataRow[] => {
     }
   }
   
+  console.log('Total parsed rows:', dataRows.length);
   return dataRows;
 };
 
@@ -128,22 +158,25 @@ export const WasteDataProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     
     try {
+      console.log('Fetching data from Google Sheets...');
       const response = await fetch(GOOGLE_SHEET_URL);
       if (!response.ok) {
         throw new Error('Failed to fetch data from Google Sheets');
       }
       const csvText = await response.text();
+      console.log('CSV received, length:', csvText.length);
+      
       const parsedData = parseCSVToWasteData(csvText);
       
       if (parsedData.length > 0) {
+        console.log('Using Google Sheets data:', parsedData.length, 'rows');
         setWasteData(parsedData);
       } else {
-        // If parsing fails or empty, use default data
+        console.log('No data parsed, using default data');
         setWasteData(defaultData);
       }
     } catch (err) {
       console.error('Error fetching data:', err);
-      // Use default data on error
       setWasteData(defaultData);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -154,10 +187,10 @@ export const WasteDataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchData();
     
-    // Auto-refresh once per day (24 hours)
+    // Auto-refresh every 5 minutes
     const interval = setInterval(() => {
       fetchData();
-    }, 24 * 60 * 60 * 1000);
+    }, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
   }, []);

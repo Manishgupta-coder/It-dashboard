@@ -96,18 +96,13 @@ const WasteDataTable = () => {
       className="chart-container p-3 sm:p-4 md:p-6"
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2 sm:gap-4">
-        <div>
-          <h3 className="text-sm sm:text-base md:text-xl font-semibold text-foreground">Waste Collection Data</h3>
-          <p className="text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
-            Detailed records with sorting & search
-          </p>
-        </div>
+        <h3 className="text-sm sm:text-base md:text-xl font-semibold text-foreground">Waste Collection Data</h3>
 
         <div className="relative">
           <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search remarks..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -27,7 +27,6 @@ const SummaryCharts = () => {
   const [period2, setPeriod2] = useState<TimePeriod>("day");
   const [period3, setPeriod3] = useState<TimePeriod>("day");
 
-  // Methane Emission Reduction (kg CO₂e) = ((Total Waste Collected (kg)/1000)*(0.6*0.5))*28
   const calculateMethaneReduction = (totalWaste: number) => {
     return Math.round(((totalWaste / 1000) * (0.6 * 0.5)) * 28);
   };
@@ -160,9 +159,23 @@ const SummaryCharts = () => {
           </h3>
           <TimePeriodDropdown value={period1} onChange={setPeriod1} />
         </div>
-        <div className="h-48 sm:h-60 md:h-72">
+        <div className="h-48 sm:h-60 md:h-72 bar-chart-shadow">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData1} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+            <BarChart data={chartData1} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+              <defs>
+                <linearGradient id="totalWasteGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(160, 84%, 50%)" />
+                  <stop offset="100%" stopColor="hsl(160, 84%, 30%)" />
+                </linearGradient>
+                <linearGradient id="recyclingGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(340, 82%, 60%)" />
+                  <stop offset="100%" stopColor="hsl(340, 82%, 40%)" />
+                </linearGradient>
+                <linearGradient id="compostedGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(45, 93%, 65%)" />
+                  <stop offset="100%" stopColor="hsl(45, 93%, 45%)" />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
               <XAxis
                 dataKey="date"
@@ -178,45 +191,42 @@ const SummaryCharts = () => {
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
                 axisLine={{ stroke: "hsl(var(--border))" }}
                 tickLine={false}
-                width={35}
+                width={45}
+                tickFormatter={(value) => `${value}`}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
                 wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
-                iconType="circle"
-                iconSize={6}
+                iconType="rect"
+                iconSize={8}
                 layout="horizontal"
                 align="center"
                 verticalAlign="bottom"
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="totalWaste"
                 name="Total Waste"
-                stroke="hsl(160, 84%, 39%)"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
+                fill="url(#totalWasteGrad)"
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="recycling"
                 name="Recycling"
-                stroke="hsl(340, 82%, 52%)"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
+                fill="url(#recyclingGrad)"
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
+                animationBegin={200}
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="composted"
                 name="Composted"
-                stroke="hsl(45, 93%, 58%)"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
+                fill="url(#compostedGrad)"
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
+                animationBegin={400}
               />
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </motion.div>
@@ -234,9 +244,23 @@ const SummaryCharts = () => {
           </h3>
           <TimePeriodDropdown value={period2} onChange={setPeriod2} />
         </div>
-        <div className="h-48 sm:h-60 md:h-72">
+        <div className="h-48 sm:h-60 md:h-72 bar-chart-shadow">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData2} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+            <BarChart data={chartData2} margin={{ top: 5, right: 35, left: 0, bottom: 5 }}>
+              <defs>
+                <linearGradient id="divertedGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(220, 70%, 65%)" />
+                  <stop offset="100%" stopColor="hsl(220, 70%, 45%)" />
+                </linearGradient>
+                <linearGradient id="residualGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(0, 65%, 60%)" />
+                  <stop offset="100%" stopColor="hsl(0, 65%, 40%)" />
+                </linearGradient>
+                <linearGradient id="rateGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(170, 70%, 55%)" />
+                  <stop offset="100%" stopColor="hsl(170, 70%, 35%)" />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
               <XAxis
                 dataKey="date"
@@ -253,7 +277,7 @@ const SummaryCharts = () => {
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
                 axisLine={{ stroke: "hsl(var(--border))" }}
                 tickLine={false}
-                width={35}
+                width={45}
               />
               <YAxis
                 yAxisId="right"
@@ -262,48 +286,45 @@ const SummaryCharts = () => {
                 axisLine={{ stroke: "hsl(var(--border))" }}
                 tickLine={false}
                 domain={[0, 100]}
-                width={30}
+                width={35}
+                tickFormatter={(value) => `${value}%`}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
                 wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
-                iconType="circle"
-                iconSize={6}
+                iconType="rect"
+                iconSize={8}
                 layout="horizontal"
                 align="center"
                 verticalAlign="bottom"
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="diverted"
                 name="Diverted"
-                stroke="hsl(220, 70%, 55%)"
-                strokeWidth={2}
+                fill="url(#divertedGrad)"
                 yAxisId="left"
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="residual"
                 name="Residual"
-                stroke="hsl(0, 65%, 50%)"
-                strokeWidth={2}
+                fill="url(#residualGrad)"
                 yAxisId="left"
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
+                animationBegin={200}
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="landfillDiversionRate"
                 name="Diversion Rate (%)"
-                stroke="hsl(170, 70%, 45%)"
-                strokeWidth={2}
+                fill="url(#rateGrad)"
                 yAxisId="right"
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
+                animationBegin={400}
               />
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </motion.div>
@@ -321,9 +342,15 @@ const SummaryCharts = () => {
           </h3>
           <TimePeriodDropdown value={period3} onChange={setPeriod3} />
         </div>
-        <div className="h-48 sm:h-60 md:h-72">
+        <div className="h-48 sm:h-60 md:h-72 bar-chart-shadow">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData3} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+            <BarChart data={chartData3} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+              <defs>
+                <linearGradient id="methaneGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(199, 89%, 58%)" />
+                  <stop offset="100%" stopColor="hsl(199, 89%, 38%)" />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
               <XAxis
                 dataKey="date"
@@ -339,27 +366,25 @@ const SummaryCharts = () => {
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
                 axisLine={{ stroke: "hsl(var(--border))" }}
                 tickLine={false}
-                width={35}
+                width={45}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend
                 wrapperStyle={{ fontSize: "10px", paddingTop: "10px" }}
-                iconType="circle"
-                iconSize={6}
+                iconType="rect"
+                iconSize={8}
                 layout="horizontal"
                 align="center"
                 verticalAlign="bottom"
               />
-              <Line
-                type="monotone"
+              <Bar
                 dataKey="methaneReduction"
                 name="Methane Reduction (kg CO₂e)"
-                stroke="hsl(199, 89%, 48%)"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, strokeWidth: 0 }}
+                fill="url(#methaneGrad)"
+                radius={[4, 4, 0, 0]}
+                animationDuration={800}
               />
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </motion.div>

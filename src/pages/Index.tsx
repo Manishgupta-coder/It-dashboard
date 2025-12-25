@@ -3,20 +3,19 @@ import {
   Recycle,
   Leaf,
   Sprout,
-  Wind,
   ArrowRightFromLine,
   Trash,
-  Percent,
   TrendingUp,
-  CheckCircle,
   Loader2,
+  Droplets,
+  Package,
+  Flame,
 } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatCard from "@/components/StatCard";
 import SummaryCharts from "@/components/SummaryCharts";
 import WasteOverviewChart from "@/components/WasteOverviewChart";
 import BreakdownChartsGrid from "@/components/BreakdownChartsGrid";
-import RecentActivity from "@/components/RecentActivity";
 import WasteDataTable from "@/components/WasteDataTable";
 import Footer from "@/components/Footer";
 import { calculateTotals } from "@/data/wasteData";
@@ -25,6 +24,10 @@ import { useWasteData } from "@/context/WasteDataContext";
 const Index = () => {
   const { wasteData, isLoading } = useWasteData();
   const totals = calculateTotals(wasteData);
+
+  // Calculate total dry and wet waste from data
+  const totalDryWaste = wasteData.reduce((sum, row) => sum + row.dryWaste, 0);
+  const totalWetWaste = wasteData.reduce((sum, row) => sum + row.wetWaste, 0);
 
   if (isLoading) {
     return (
@@ -43,11 +46,27 @@ const Index = () => {
       value: totals.totalWaste,
       unit: "kg",
       icon: Trash2,
-      color: "hsl(160, 84%, 39%)",
+      color: "hsl(199, 89%, 48%)",
       trend: 8,
     },
     {
-      title: "Waste sent for Recycling",
+      title: "Total Dry Waste Collected",
+      value: totalDryWaste,
+      unit: "kg",
+      icon: Package,
+      color: "hsl(45, 93%, 58%)",
+      trend: 5,
+    },
+    {
+      title: "Total Wet Waste Collected",
+      value: totalWetWaste,
+      unit: "kg",
+      icon: Droplets,
+      color: "hsl(160, 84%, 39%)",
+      trend: 6,
+    },
+    {
+      title: "Dry Waste Sent for Recycling",
       value: totals.recycling,
       unit: "kg",
       icon: Recycle,
@@ -55,36 +74,12 @@ const Index = () => {
       trend: 5,
     },
     {
-      title: "Waste Composted",
+      title: "Wet Waste Composted",
       value: totals.composted,
       unit: "kg",
       icon: Leaf,
-      color: "hsl(45, 93%, 58%)",
-      trend: 12,
-    },
-    {
-      title: "Compost Produced",
-      value: totals.compostProduced,
-      unit: "kg",
-      icon: Sprout,
       color: "hsl(120, 60%, 45%)",
-      trend: 10,
-    },
-    {
-      title: "Methane Emission Reduction",
-      value: totals.methaneReduction,
-      unit: "kg CO₂e",
-      icon: Wind,
-      color: "hsl(199, 89%, 48%)",
-      trend: 15,
-    },
-    {
-      title: "Waste Diverted from Landfill",
-      value: totals.diverted,
-      unit: "kg",
-      icon: ArrowRightFromLine,
-      color: "hsl(220, 70%, 55%)",
-      trend: 7,
+      trend: 12,
     },
     {
       title: "Residual Waste to Landfill",
@@ -95,12 +90,12 @@ const Index = () => {
       trend: -3,
     },
     {
-      title: "Recycling Efficiency",
-      value: totals.recyclingEfficiency,
-      unit: "%",
-      icon: Percent,
-      color: "hsl(280, 65%, 60%)",
-      trend: 4,
+      title: "Waste Diverted from Landfill",
+      value: totals.diverted,
+      unit: "kg",
+      icon: ArrowRightFromLine,
+      color: "hsl(220, 70%, 55%)",
+      trend: 7,
     },
     {
       title: "Landfill Diversion Rate",
@@ -111,12 +106,20 @@ const Index = () => {
       trend: 6,
     },
     {
-      title: "Segregation Efficiency",
-      value: totals.segregationEfficiency,
-      unit: "%",
-      icon: CheckCircle,
-      color: "hsl(50, 90%, 50%)",
-      trend: 2,
+      title: "Compost Produced",
+      value: totals.compostProduced,
+      unit: "kg",
+      icon: Sprout,
+      color: "hsl(280, 65%, 60%)",
+      trend: 10,
+    },
+    {
+      title: "Methane Emission Reduction",
+      value: totals.methaneReduction,
+      unit: "kg CO₂e",
+      icon: Flame,
+      color: "hsl(25, 95%, 53%)",
+      trend: 15,
     },
   ];
 
@@ -130,8 +133,7 @@ const Index = () => {
       <main className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <DashboardHeader />
 
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
           {stats.map((stat, index) => (
             <StatCard key={stat.title} {...stat} delay={index * 0.1} />
           ))}
@@ -149,10 +151,6 @@ const Index = () => {
 
         <div className="mb-8">
           <WasteDataTable />
-        </div>
-
-        <div className="mb-8">
-          <RecentActivity />
         </div>
       </main>
 

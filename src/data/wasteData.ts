@@ -411,13 +411,13 @@ export const calculateTotals = (data: WasteDataRow[]) => {
     { recycling: 0, composted: 0, paper: 0, glass: 0, plastic: 0, metal: 0, ewaste: 0, others: 0, totalWasteSum: 0, dryWasteSum: 0, wetWasteSum: 0, count: 0 }
   );
 
-  // Total Waste Collected = Waste sent for Recycling (kg) + Waste Composted (kg)
-  const totalWaste = totals.recycling + totals.composted;
+  // Total Waste Collected from data
+  const totalWaste = totals.totalWasteSum;
   
-  // Waste Diverted from Landfill (kg) = Total Waste Collected - (5% of Total Waste Collected)
-  const diverted = Math.round(totalWaste - (totalWaste * 0.05));
+  // Waste Diverted from Landfill = Dry Waste Sent for Recycling + Wet Waste Composted
+  const diverted = totals.recycling + totals.composted;
   
-  // Residual Waste to Landfill (kg) = Total Waste Collected - Waste Diverted from Landfill
+  // Residual Waste to Landfill = Total Waste - Waste Diverted
   const residualToLandfill = totalWaste - diverted;
   
   // Compost Produced (kg) = 20% of Waste Composted (kg)

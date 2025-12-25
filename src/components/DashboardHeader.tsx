@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Recycle, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import SBIFoundation from "@/assets/images/SBI-Foundation.png";
@@ -24,46 +24,34 @@ const DashboardHeader = () => {
       transition={{ duration: 0.5 }}
       className="mb-8"
     >
-
-      {/* Partner Logos - Full Width */}
+      {/* Partner Logos - Matching reference image layout */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex items-center justify-center mb-6 sm:mb-6 w-full"
+        className="flex items-center justify-center mb-6 w-full"
       >
-        <div className="grid grid-cols-2 sm:grid-cols-4 items-center justify-items-center gap-3 sm:gap-4 md:gap-6 w-full bg-white/90 dark:bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5">
-          <div className="flex items-center justify-center h-12 sm:h-12 md:h-16 lg:h-20 w-[60%]">
+        <div className="flex items-center justify-between w-full bg-white rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
             <img src={SBIFoundation} alt="SBI Foundation" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-12 sm:h-12 md:h-16 lg:h-20 w-full">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
             <img src={SBIConserw} alt="SBI CONSERW" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-12 sm:h-12 md:h-16 lg:h-20 w-full">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
             <img src={Ayodhya} alt="Ayodhya" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-12 sm:h-12 md:h-16 lg:h-20 w-full">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
             <img src={Chintan} alt="Chintan" className="h-full w-auto object-contain" />
           </div>
         </div>
       </motion.div>
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
-            className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-primary/20 animate-pulse-glow flex-shrink-0"
-          >
-            <Recycle className="w-5 h-5 sm:w-8 sm:h-8 text-primary" />
-          </motion.div>
-          <div>
-            <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground leading-tight mb-2">
-              SBIF CONSERW: Waste No More in Ayodhya
-            </h1>
-            <p >IT Dashboard</p>
-          </div>
+        <div>
+          <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
+            Waste Management Dashboard - Ayodhya
+          </h1>
         </div>
 
         <motion.div

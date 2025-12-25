@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
+import { useState, useMemo } from "react";
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
   Tooltip,
-  Legend,
 } from "recharts";
 import {
   getPlasticBreakdown,
@@ -16,6 +16,13 @@ import {
   getOthersBreakdown,
 } from "@/data/wasteData";
 import { useWasteData } from "@/context/WasteDataContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const COLORS = [
   "hsl(160, 84%, 39%)",
@@ -24,23 +31,49 @@ const COLORS = [
   "hsl(199, 89%, 48%)",
   "hsl(280, 65%, 60%)",
   "hsl(120, 60%, 45%)",
+  "hsl(15, 80%, 55%)",
 ];
+
+type TimePeriod = "day" | "week" | "month" | "quarter" | "year";
 
 const BreakdownChartsGrid = () => {
   const { wasteData } = useWasteData();
-  const plasticData = getPlasticBreakdown(wasteData);
-  const paperData = getPaperBreakdown(wasteData);
-  const glassData = getGlassBreakdown(wasteData);
-  const metalData = getMetalBreakdown(wasteData);
-  const ewasteData = getEwasteBreakdown(wasteData);
-  const othersData = getOthersBreakdown(wasteData);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
+
+  const filteredData = useMemo(() => {
+    if (timePeriod === "day") {
+      return wasteData;
+    }
+    return wasteData;
+  }, [wasteData, timePeriod]);
+
+
+  const plasticData = getPlasticBreakdown(filteredData);
+  const paperData = getPaperBreakdown(filteredData);
+  const glassData = getGlassBreakdown(filteredData);
+  const metalData = getMetalBreakdown(filteredData);
+  const ewasteData = getEwasteBreakdown(filteredData);
+  const othersData = getOthersBreakdown(filteredData);
+
+  // Calculate Others total to add to each breakdown
+  const othersTotal = filteredData.reduce((sum, row) => {
+    return sum + row.others.expiredMedicines + row.others.medicinesPackaging + row.others.thermometers;
+  }, 0);
+
+  // Add Others to each breakdown except the Others chart itself
+  const addOthersToData = (data: { name: string; value: number; color?: string }[]) => {
+    return [
+      ...data,
+      { name: "Others", value: othersTotal, color: "hsl(25, 95%, 53%)" }
+    ];
+  };
 
   const charts = [
-    { title: "Plastic", subtitle: "Bags, Bottles & Polythene", data: plasticData },
-    { title: "Paper", subtitle: "Paper sub-categories", data: paperData },
-    { title: "Glass", subtitle: "Glass grades", data: glassData },
-    { title: "Metal", subtitle: "Aluminum & Containers", data: metalData },
-    { title: "E-waste", subtitle: "Electronic waste", data: ewasteData },
+    { title: "Plastic", subtitle: "Bags, Bottles & Polythene", data: addOthersToData(plasticData) },
+    { title: "Paper", subtitle: "Paper sub-categories", data: addOthersToData(paperData) },
+    { title: "Glass", subtitle: "Glass grades", data: addOthersToData(glassData) },
+    { title: "Metal", subtitle: "Aluminum & Containers", data: addOthersToData(metalData) },
+    { title: "E-waste", subtitle: "Electronic waste", data: addOthersToData(ewasteData) },
     { title: "Others", subtitle: "Medicines & Thermometers", data: othersData },
   ];
 
@@ -64,9 +97,23 @@ const BreakdownChartsGrid = () => {
       transition={{ duration: 0.5 }}
       className="chart-container p-3 sm:p-4 md:p-6"
     >
-      <h3 className="text-base sm:text-lg md:text-xl font-semibold text-foreground mb-3 sm:mb-4 md:mb-6">
-        Dry Waste Breakdown
-      </h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2">
+        <h3 className="text-base sm:text-lg md:text-xl font-semibold text-foreground">
+          Dry Waste Breakdown
+        </h3>
+        <Select value={timePeriod} onValueChange={(val) => setTimePeriod(val as TimePeriod)}>
+          <SelectTrigger className="w-28 h-8 text-xs bg-secondary/50 border-border">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-card border-border">
+            <SelectItem value="day">Day</SelectItem>
+            <SelectItem value="week">Week</SelectItem>
+            <SelectItem value="month">Month</SelectItem>
+            <SelectItem value="quarter">Quarter</SelectItem>
+            <SelectItem value="year">Year</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
         {charts.map((chart, index) => (
@@ -92,6 +139,8 @@ const BreakdownChartsGrid = () => {
                     outerRadius={50}
                     paddingAngle={2}
                     dataKey="value"
+                    animationDuration={800}
+                    animationBegin={index * 100}
                   >
                     {chart.data.map((_, idx) => (
                       <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
@@ -101,7 +150,7 @@ const BreakdownChartsGrid = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 max-h-24 sm:max-h-32 overflow-y-auto">
+            <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1">
               {chart.data.map((item, idx) => (
                 <div key={item.name} className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs">
                   <div

@@ -6,58 +6,105 @@
 
 @layer base {
   :root {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 160 84% 39%;
-    --primary-foreground: 222 47% 8%;
+    --primary: 152 76% 36%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 47% 16%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 222 47% 14%;
-    --muted-foreground: 215 20% 55%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 173 80% 40%;
-    --accent-foreground: 222 47% 8%;
+    --accent: 172 66% 50%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 222 47% 18%;
-    --input: 222 47% 18%;
-    --ring: 160 84% 39%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 152 76% 36%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --glass: 222 47% 12%;
-    --glass-border: 222 47% 20%;
+    --glass: 210 40% 98%;
+    --glass-border: 214 32% 85%;
     
     --chart-plastic: 340 82% 52%;
-    --chart-paper: 45 93% 58%;
+    --chart-paper: 45 93% 47%;
     --chart-glass: 199 89% 48%;
     --chart-metal: 220 70% 55%;
-    --chart-ewaste: 280 65% 60%;
-    --chart-others: 15 80% 55%;
+    --chart-ewaste: 280 65% 55%;
+    --chart-others: 25 95% 53%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(160 84% 39%), hsl(173 80% 40%));
-    --gradient-card: linear-gradient(145deg, hsl(222 47% 13%), hsl(222 47% 9%));
+    --gradient-primary: linear-gradient(135deg, hsl(152 76% 36%), hsl(172 66% 50%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(152 76% 36% / 0.1), transparent 70%);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 152 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 152 76% 36%;
+  }
+
+  .dark {
+    --background: 200 30% 12%;
+    --foreground: 210 40% 98%;
+
+    --card: 200 35% 15%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 200 35% 15%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 160 84% 39%;
+    --primary-foreground: 200 30% 8%;
+
+    --secondary: 200 30% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 200 25% 18%;
+    --muted-foreground: 200 20% 60%;
+
+    --accent: 172 66% 50%;
+    --accent-foreground: 200 30% 8%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 200 30% 25%;
+    --input: 200 30% 25%;
+    --ring: 160 84% 39%;
+
+    /* Custom tokens */
+    --glass: 200 30% 16%;
+    --glass-border: 200 30% 28%;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(160 84% 39%), hsl(172 66% 50%));
+    --gradient-card: linear-gradient(145deg, hsl(200 35% 18%), hsl(200 30% 12%));
     --gradient-glow: radial-gradient(ellipse at center, hsl(160 84% 39% / 0.15), transparent 70%);
 
-    --sidebar-background: 222 47% 8%;
+    --sidebar-background: 200 30% 12%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 160 84% 39%;
-    --sidebar-primary-foreground: 222 47% 8%;
-    --sidebar-accent: 222 47% 16%;
+    --sidebar-primary-foreground: 200 30% 8%;
+    --sidebar-accent: 200 30% 20%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 47% 18%;
+    --sidebar-border: 200 30% 25%;
     --sidebar-ring: 160 84% 39%;
   }
 }
@@ -79,8 +126,8 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;
-    background: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
+    @apply bg-card backdrop-blur-xl border border-border rounded-xl shadow-lg;
+    box-shadow: 0 4px 24px hsl(var(--primary) / 0.08), 0 2px 8px hsl(0 0% 0% / 0.05);
   }
 
   .stat-card {
@@ -102,7 +149,7 @@
   }
 
   .glow-text {
-    text-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.3);
   }
 
   .animate-float {
@@ -130,6 +177,10 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0.5;
+  }
+
+  .bar-chart-shadow {
+    filter: drop-shadow(0 4px 8px hsl(var(--primary) / 0.15));
   }
 }
 
