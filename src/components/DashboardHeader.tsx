@@ -6,6 +6,8 @@ import SBIFoundation from "@/assets/images/SBI-Foundation.png";
 import SBIConserw from "@/assets/images/Sbi-CONSERW.png";
 import Ayodhya from "@/assets/images/Ayodhya.png";
 import Chintan from "@/assets/images/Chintan.png";
+import AyodhyaBanner from "@/assets/images/ayodhya.webp";
+
 import {
   Dialog,
   DialogContent,
@@ -36,7 +38,7 @@ const DashboardHeader = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex items-center justify-center mb-6 w-full"
+        className="flex items-center justify-center mb-4 w-full"
       >
         <div className="flex items-center justify-between w-full bg-white rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6">
           <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
@@ -51,6 +53,28 @@ const DashboardHeader = () => {
           <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
             <img src={Chintan} alt="Chintan" className="h-full w-auto object-contain" />
           </div>
+        </div>
+      </motion.div>
+
+      {/* Ayodhya Banner */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3 }}
+        className="mt-4 mb-6 w-full overflow-hidden rounded-lg sm:rounded-xl relative"
+      >
+        <img 
+          src={AyodhyaBanner} 
+          alt="SBIF CONSERW: Waste No More in Ayodhya" 
+          className="w-full h-auto object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-sky-600/70 via-sky-500/60 to-teal-500/70 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white drop-shadow-lg tracking-wide mb-2 sm:mb-3 text-center">
+            SBIF CONSERW: WASTE NO MORE IN AYODHYA
+          </h2>
+          <p className="text-xs sm:text-sm md:text-base text-white/90 italic max-w-4xl mx-auto leading-relaxed text-center">
+            Supported by Ayodhya Nagar Nigam, Chintan Environmental Research and Action Group, and SBI Foundation under their Conservation through Sustainable Engagements, Restoration and Wildlife Protection (CONSERW) program
+          </p>
         </div>
       </motion.div>
 

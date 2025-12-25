@@ -156,9 +156,7 @@ const Index = () => {
           <BreakdownChartsGrid />
         </div>
 
-        <div className="mb-4">
-          <WasteDataTable />
-        </div>
+        <WasteDataTable />
       </main>
 
       <Footer />

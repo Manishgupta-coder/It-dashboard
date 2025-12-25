@@ -247,8 +247,8 @@ const SummaryCharts = () => {
           </h3>
           <TimePeriodDropdown value={period2} onChange={setPeriod2} />
         </div>
-        <div className="h-48 sm:h-60 md:h-72 bar-chart-shadow overflow-x-auto">
-          <div className="min-w-[400px] h-full">
+        <div className="h-48 sm:h-60 md:h-72 bar-chart-shadow overflow-x-auto overflow-y-hidden">
+          <div className="min-w-[500px] h-full pr-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData2} margin={{ top: 5, right: 35, left: 0, bottom: 5 }}>
               <defs>

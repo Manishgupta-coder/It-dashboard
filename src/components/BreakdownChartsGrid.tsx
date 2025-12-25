@@ -37,6 +37,22 @@ const COLORS = [
 
 type TimePeriod = "day" | "week" | "month" | "quarter" | "year";
 
+// Parse date in "DD-Mon-YYYY" format
+const parseDate = (dateStr: string): Date => {
+  const months: { [key: string]: number } = {
+    'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+    'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+  };
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const month = months[parts[1]] ?? 0;
+    const year = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+  }
+  return new Date(dateStr);
+};
+
 const BreakdownChartsGrid = () => {
   const { wasteData } = useWasteData();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
@@ -44,30 +60,32 @@ const BreakdownChartsGrid = () => {
   const filteredData = useMemo(() => {
     if (!wasteData || wasteData.length === 0) return [];
     
-    const now = new Date();
     const sortedData = [...wasteData].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
+      parseDate(b.date).getTime() - parseDate(a.date).getTime()
     );
+    
+    // Use the latest date in the data as reference, not current date
+    const latestDate = parseDate(sortedData[0].date);
     
     switch (timePeriod) {
       case "day":
-        // Get the latest day's data
+        // Get the latest day's data only
         return sortedData.slice(0, 1);
       case "week":
-        // Get last 7 days
-        const weekAgo = new Date(now);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return sortedData.filter(row => new Date(row.date) >= weekAgo);
+        // Get last 7 days from latest data date
+        const weekAgo = new Date(latestDate);
+        weekAgo.setDate(weekAgo.getDate() - 6); // 7 days including the latest
+        return sortedData.filter(row => parseDate(row.date) >= weekAgo);
       case "month":
-        // Get last 30 days
-        const monthAgo = new Date(now);
-        monthAgo.setDate(monthAgo.getDate() - 30);
-        return sortedData.filter(row => new Date(row.date) >= monthAgo);
+        // Get last 30 days from latest data date
+        const monthAgo = new Date(latestDate);
+        monthAgo.setDate(monthAgo.getDate() - 29);
+        return sortedData.filter(row => parseDate(row.date) >= monthAgo);
       case "quarter":
-        // Get last 90 days
-        const quarterAgo = new Date(now);
-        quarterAgo.setDate(quarterAgo.getDate() - 90);
-        return sortedData.filter(row => new Date(row.date) >= quarterAgo);
+        // Get last 90 days from latest data date
+        const quarterAgo = new Date(latestDate);
+        quarterAgo.setDate(quarterAgo.getDate() - 89);
+        return sortedData.filter(row => parseDate(row.date) >= quarterAgo);
       case "year":
         // Get all data (full year)
         return sortedData;
@@ -76,34 +94,36 @@ const BreakdownChartsGrid = () => {
     }
   }, [wasteData, timePeriod]);
 
-  const plasticData = getPlasticBreakdown(filteredData);
-  const paperData = getPaperBreakdown(filteredData);
-  const glassData = getGlassBreakdown(filteredData);
-  const metalData = getMetalBreakdown(filteredData);
-  const ewasteData = getEwasteBreakdown(filteredData);
-  const othersData = getOthersBreakdown(filteredData);
+  const chartData = useMemo(() => {
+    const plasticData = getPlasticBreakdown(filteredData);
+    const paperData = getPaperBreakdown(filteredData);
+    const glassData = getGlassBreakdown(filteredData);
+    const metalData = getMetalBreakdown(filteredData);
+    const ewasteData = getEwasteBreakdown(filteredData);
+    const othersData = getOthersBreakdown(filteredData);
 
-  // Calculate Others total to add to each breakdown
-  const othersTotal = filteredData.reduce((sum, row) => {
-    return sum + row.others.expiredMedicines + row.others.medicinesPackaging + row.others.thermometers;
-  }, 0);
+    // Calculate Others total to add to each breakdown
+    const othersTotal = filteredData.reduce((sum, row) => {
+      return sum + row.others.expiredMedicines + row.others.medicinesPackaging + row.others.thermometers;
+    }, 0);
 
-  // Add Others to each breakdown except the Others chart itself
-  const addOthersToData = (data: { name: string; value: number; color?: string }[]) => {
+    // Add Others to each breakdown except the Others chart itself
+    const addOthersToData = (data: { name: string; value: number; color?: string }[]) => {
+      return [
+        ...data,
+        { name: "Others", value: othersTotal, color: "hsl(25, 95%, 53%)" }
+      ];
+    };
+
     return [
-      ...data,
-      { name: "Others", value: othersTotal, color: "hsl(25, 95%, 53%)" }
+      { title: "Plastic", data: addOthersToData(plasticData) },
+      { title: "Paper", data: addOthersToData(paperData) },
+      { title: "Glass", data: addOthersToData(glassData) },
+      { title: "Metal", data: addOthersToData(metalData) },
+      { title: "E-waste", data: addOthersToData(ewasteData) },
+      { title: "Others", data: othersData },
     ];
-  };
-
-  const charts = [
-    { title: "Plastic", data: addOthersToData(plasticData) },
-    { title: "Paper", data: addOthersToData(paperData) },
-    { title: "Glass", data: addOthersToData(glassData) },
-    { title: "Metal", data: addOthersToData(metalData) },
-    { title: "E-waste", data: addOthersToData(ewasteData) },
-    { title: "Others", data: othersData },
-  ];
+  }, [filteredData]);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -125,13 +145,13 @@ const BreakdownChartsGrid = () => {
       transition={{ duration: 0.5 }}
       className="chart-container p-3 sm:p-4 md:p-6"
     >
-      <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2">
-        <h3 className="text-base sm:text-lg md:text-xl font-semibold text-foreground flex items-center gap-2">
-          <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          Dry Waste Breakdown
+      <div className="flex flex-row items-center justify-between mb-3 sm:mb-4 md:mb-6 gap-2">
+        <h3 className="text-base sm:text-lg md:text-xl font-semibold text-foreground flex items-center gap-2 whitespace-nowrap">
+          <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+          <span className="truncate">Dry Waste Breakdown</span>
         </h3>
         <Select value={timePeriod} onValueChange={(val) => setTimePeriod(val as TimePeriod)}>
-          <SelectTrigger className="w-28 h-8 text-xs bg-secondary/50 border-border">
+          <SelectTrigger className="w-24 sm:w-28 h-8 text-xs bg-secondary/50 border-border flex-shrink-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-card border-border">
@@ -145,7 +165,7 @@ const BreakdownChartsGrid = () => {
       </div>
       
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-        {charts.map((chart, index) => (
+        {chartData.map((chart, index) => (
           <motion.div
             key={chart.title}
             initial={{ opacity: 0, scale: 0.95 }}
