@@ -56,50 +56,59 @@ const formatDate = (value: any): string => {
 // Calculate derived metrics based on user's formulas
 // Column names matched to user's Excel sheet headers
 export const calculateDerivedMetrics = (row: any): Partial<WasteDataRow> => {
-  // 1. Plastic = Bags/Sacks + Pet Bottles + HDPE Bottles + Polythene + Thermocol
+  // 1. Plastic = Bags/Sacks + Pet Bottles + HDPE Bottles + Polythene + Others
   const plastic = {
     bags: getNumericValue(findValue(row, ["Bags/Sacks", "bags", "Bags"])),
     petBottles: getNumericValue(findValue(row, ["Pet Bottles", "petBottles", "PET Bottles"])),
     hdpeBottles: getNumericValue(findValue(row, ["HDPE Bottles", "hdpeBottles", "HDPE"])),
     polythene: getNumericValue(findValue(row, ["Polythene", "polythene"])),
-    thermocol: getNumericValue(findValue(row, ["Thermocol", "thermocol"])),
+    others: getNumericValue(findValue(row, ["Plastic Others", "Thermocol", "thermocol"])),
   };
-  const totalPlastic = plastic.bags + plastic.petBottles + plastic.hdpeBottles + plastic.polythene + plastic.thermocol;
+  const totalPlastic = plastic.bags + plastic.petBottles + plastic.hdpeBottles + plastic.polythene + plastic.others;
 
-  // 2. Paper = Newspaper + Carton + Normal Paper + Cardboard
+  // 2. Paper = Thermocol + Newspaper + Carton + Normal Paper + Cardboard + Others
   const paper = {
+    thermocol: getNumericValue(findValue(row, ["Paper Thermocol", "Thermocol"])),
     newspaper: getNumericValue(findValue(row, ["Newspaper", "newspaper"])),
     cartoon: getNumericValue(findValue(row, ["Carton", "Cartoon", "cartoon"])),
     normalPaper: getNumericValue(findValue(row, ["Normal Paper", "normalPaper"])),
     cardboard: getNumericValue(findValue(row, ["Cardboard", "cardboard"])),
+    others: getNumericValue(findValue(row, ["Paper Others"])),
   };
-  const totalPaper = paper.newspaper + paper.cartoon + paper.normalPaper + paper.cardboard;
+  const totalPaper = paper.thermocol + paper.newspaper + paper.cartoon + paper.normalPaper + paper.cardboard + paper.others;
 
-  // 3. Glass = White grades (from Glass (kg) column)
-  const glass = getNumericValue(findValue(row, ["White Grades", "Glass (kg)", "Glass", "glass", "White grades"]));
+  // 3. Glass = White grades + Others
+  const glass = {
+    whiteGrades: getNumericValue(findValue(row, ["White Grades", "Glass (kg)", "Glass", "glass", "White grades"])),
+    others: getNumericValue(findValue(row, ["Glass Others"])),
+  };
+  const totalGlass = glass.whiteGrades + glass.others;
 
-  // 4. Metal = Aluminum cans + Food Packing container
+  // 4. Metal = Aluminum cans + Food Packing container + Others
   const metal = {
     aluminumCans: getNumericValue(findValue(row, ["Aluminum cans", "Aluminum", "aluminumCans", "Aluminum Cans"])),
     foodPackingContainer: getNumericValue(findValue(row, ["Food Packing container", "Food Packing Container", "foodPackingContainer", "Food Container"])),
+    others: getNumericValue(findValue(row, ["Metal Others"])),
   };
-  const totalMetal = metal.aluminumCans + metal.foodPackingContainer;
+  const totalMetal = metal.aluminumCans + metal.foodPackingContainer + metal.others;
 
-  // 5. E-waste = Batteries + Charger + Lighting
+  // 5. E-waste = Batteries + Charger + Lighting + Others
   const ewaste = {
     batteries: getNumericValue(findValue(row, ["Batteries", "batteries"])),
     charger: getNumericValue(findValue(row, ["Charger", "charger", "Chargers"])),
     lighting: getNumericValue(findValue(row, ["Lighting", "lighting"])),
+    others: getNumericValue(findValue(row, ["E-waste Others", "Ewaste Others"])),
   };
-  const totalEwaste = ewaste.batteries + ewaste.charger + ewaste.lighting;
+  const totalEwaste = ewaste.batteries + ewaste.charger + ewaste.lighting + ewaste.others;
 
-  // 6. Others = Expired medicines + Medicines packaging + Thermometers
+  // 6. Others = Expired medicines + Medicines packaging + Thermometers + Others
   const others = {
     expiredMedicines: getNumericValue(findValue(row, ["Expired medicines", "Expired Medicines", "expiredMedicines"])),
     medicinesPackaging: getNumericValue(findValue(row, ["Medicines packaging", "Medicines Packaging", "medicinesPackaging"])),
     thermometers: getNumericValue(findValue(row, ["Thermometers", "thermometers"])),
+    others: getNumericValue(findValue(row, ["Others Others"])),
   };
-  const totalOthers = others.expiredMedicines + others.medicinesPackaging + others.thermometers;
+  const totalOthers = others.expiredMedicines + others.medicinesPackaging + others.thermometers + others.others;
 
   // Get base values from Excel - matching exact column names from user's sheet
   // Try to get from Excel first
@@ -117,7 +126,7 @@ export const calculateDerivedMetrics = (row: any): Partial<WasteDataRow> => {
   
   // Total Waste Collected = Waste sent for Recycling + Waste Composted (as per user requirement)
   const totalWaste = totalWasteFromExcel || (recyclingValue + wasteCompostedValue) || 
-    (totalPlastic + totalPaper + glass + totalMetal + totalEwaste + totalOthers);
+    (totalPlastic + totalPaper + totalGlass + totalMetal + totalEwaste + totalOthers);
   const dryWaste = getNumericValue(findValue(row, ["Dry Waste (kg)", "Dry Waste", "dryWaste"]));
   const wetWaste = getNumericValue(findValue(row, ["Wet Waste (kg)", "Wet Waste", "wetWaste"]));
   const textiles = getNumericValue(findValue(row, ["Textiles", "textiles"]));
@@ -270,13 +279,13 @@ export const parseExcelFile = (file: File): Promise<WasteDataRow[]> => {
             totalWaste: metrics.totalWaste || 0,
             dryWaste: metrics.dryWaste || 0,
             wetWaste: metrics.wetWaste || 0,
-            plastic: metrics.plastic || { bags: 0, petBottles: 0, hdpeBottles: 0, polythene: 0, thermocol: 0 },
-            paper: metrics.paper || { newspaper: 0, cartoon: 0, normalPaper: 0, cardboard: 0 },
-            glass: metrics.glass || 0,
-            metal: metrics.metal || { aluminumCans: 0, foodPackingContainer: 0 },
+            plastic: metrics.plastic || { bags: 0, petBottles: 0, hdpeBottles: 0, polythene: 0, others: 0 },
+            paper: metrics.paper || { thermocol: 0, newspaper: 0, cartoon: 0, normalPaper: 0, cardboard: 0, others: 0 },
+            glass: metrics.glass || { whiteGrades: 0, others: 0 },
+            metal: metrics.metal || { aluminumCans: 0, foodPackingContainer: 0, others: 0 },
             textiles: metrics.textiles || 0,
-            ewaste: metrics.ewaste || { batteries: 0, charger: 0, lighting: 0 },
-            others: metrics.others || { expiredMedicines: 0, medicinesPackaging: 0, thermometers: 0 },
+            ewaste: metrics.ewaste || { batteries: 0, charger: 0, lighting: 0, others: 0 },
+            others: metrics.others || { expiredMedicines: 0, medicinesPackaging: 0, thermometers: 0, others: 0 },
             recycling: metrics.recycling || 0,
             composted: metrics.composted || 0,
             compostProduced: metrics.compostProduced || 0,

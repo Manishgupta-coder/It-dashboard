@@ -13,9 +13,7 @@ import {
 } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatCard from "@/components/StatCard";
-import SummaryCharts from "@/components/SummaryCharts";
-import WasteOverviewChart from "@/components/WasteOverviewChart";
-import BreakdownChartsGrid from "@/components/BreakdownChartsGrid";
+import DryWasteMethaneSection from "@/components/DryWasteMethaneSection";
 import WasteDataTable from "@/components/WasteDataTable";
 import Footer from "@/components/Footer";
 import AnimatedTruck from "@/components/AnimatedTruck";
@@ -146,15 +144,7 @@ const Index = () => {
           ))}
         </div>
 
-        <SummaryCharts />
-
-        <div className="mb-8">
-          <WasteOverviewChart />
-        </div>
-
-        <div className="mb-8">
-          <BreakdownChartsGrid />
-        </div>
+        <DryWasteMethaneSection />
 
         <WasteDataTable />
       </main>

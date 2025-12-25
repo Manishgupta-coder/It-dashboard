@@ -189,13 +189,8 @@ const WasteOverviewChart = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-      className="chart-container p-3 sm:p-4 md:p-6 relative overflow-hidden"
+      className="chart-container p-3 sm:p-4 md:p-6"
     >
-      {/* Decorative corner elements */}
-      <div className="absolute top-0 left-0 w-20 h-20 border-l-4 border-t-4 border-primary/20 rounded-tl-2xl" />
-      <div className="absolute top-0 right-0 w-20 h-20 border-r-4 border-t-4 border-accent/20 rounded-tr-2xl" />
-      <div className="absolute bottom-0 left-0 w-20 h-20 border-l-4 border-b-4 border-accent/20 rounded-bl-2xl" />
-      <div className="absolute bottom-0 right-0 w-20 h-20 border-r-4 border-b-4 border-primary/20 rounded-br-2xl" />
 
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between mb-4 gap-3">

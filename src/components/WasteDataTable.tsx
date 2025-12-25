@@ -31,13 +31,13 @@ const WasteDataTable = () => {
       case "paper":
         return Object.values(row.paper).reduce((a, b) => a + b, 0);
       case "glass":
-        return row.glass;
+        return row.glass.whiteGrades + row.glass.others;
       case "metal":
         return Object.values(row.metal).reduce((a, b) => a + b, 0);
       case "ewaste":
         return Object.values(row.ewaste).reduce((a, b) => a + b, 0);
       case "others":
-        return row.others.expiredMedicines + row.others.medicinesPackaging + row.others.thermometers;
+        return Object.values(row.others).reduce((a, b) => a + b, 0);
       case "remarks":
         return row.remarks;
       default:
@@ -156,7 +156,7 @@ const WasteDataTable = () => {
                   </span>
                 </td>
                 <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-                  <span className="text-chart-glass font-medium">{row.glass}</span>
+                  <span className="text-chart-glass font-medium">{row.glass.whiteGrades + row.glass.others}</span>
                 </td>
                 <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
                   <span className="text-chart-metal font-medium">
@@ -170,7 +170,7 @@ const WasteDataTable = () => {
                 </td>
                 <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
                   <span className="text-chart-others font-medium">
-                    {row.others.expiredMedicines + row.others.medicinesPackaging + row.others.thermometers}
+                    {Object.values(row.others).reduce((a, b) => a + b, 0)}
                   </span>
                 </td>
                 <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-muted-foreground min-w-[120px] sm:min-w-[200px] max-w-[200px] sm:max-w-[300px]">

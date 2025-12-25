@@ -96,33 +96,41 @@ const parseCSVToWasteData = (csvText: string): WasteDataRow[] => {
           dryWaste,
           wetWaste,
           plastic: {
-            bags: parseFloat(values[4]) || 0,
-            petBottles: parseFloat(values[5]) || 0,
-            hdpeBottles: parseFloat(values[6]) || 0,
-            polythene: parseFloat(values[7]) || 0,
-            thermocol: parseFloat(values[9]) || 0, // Thermocol is in paper section but belongs to plastic
+            bags: parseFloat(values[4]) || 0,           // Bags/Sacks
+            petBottles: parseFloat(values[5]) || 0,     // Pet Bottles
+            hdpeBottles: parseFloat(values[6]) || 0,    // HDPE Bottles
+            polythene: parseFloat(values[7]) || 0,      // Polythene
+            others: parseFloat(values[8]) || 0,         // Plastic Others
           },
           paper: {
-            newspaper: parseFloat(values[10]) || 0,
-            cartoon: parseFloat(values[11]) || 0,
-            normalPaper: parseFloat(values[12]) || 0,
-            cardboard: parseFloat(values[13]) || 0,
+            thermocol: parseFloat(values[9]) || 0,      // Thermocol
+            newspaper: parseFloat(values[10]) || 0,     // Newspaper
+            cartoon: parseFloat(values[11]) || 0,       // Cartoon
+            normalPaper: parseFloat(values[12]) || 0,   // Normal Paper
+            cardboard: parseFloat(values[13]) || 0,     // Cardboard
+            others: parseFloat(values[14]) || 0,        // Paper Others
           },
-          glass: parseFloat(values[15]) || 0,
+          glass: {
+            whiteGrades: parseFloat(values[15]) || 0,   // Glass White Grades
+            others: parseFloat(values[16]) || 0,        // Glass Others
+          },
           metal: {
-            aluminumCans: parseFloat(values[17]) || 0,
-            foodPackingContainer: parseFloat(values[18]) || 0,
+            aluminumCans: parseFloat(values[17]) || 0,  // Aluminum cans
+            foodPackingContainer: parseFloat(values[18]) || 0, // Food Packing container
+            others: parseFloat(values[19]) || 0,        // Metal Others
           },
           textiles: 0,
           ewaste: {
-            batteries: parseFloat(values[20]) || 0,
-            charger: parseFloat(values[21]) || 0,
-            lighting: parseFloat(values[22]) || 0,
+            batteries: parseFloat(values[20]) || 0,     // Batteries
+            charger: parseFloat(values[21]) || 0,       // Charger
+            lighting: parseFloat(values[22]) || 0,      // Lighting
+            others: parseFloat(values[23]) || 0,        // E-waste Others
           },
           others: {
-            expiredMedicines: parseFloat(values[24]) || 0,
-            medicinesPackaging: parseFloat(values[25]) || 0,
-            thermometers: parseFloat(values[26]) || 0,
+            expiredMedicines: parseFloat(values[24]) || 0,   // Expired medicines
+            medicinesPackaging: parseFloat(values[25]) || 0, // Medicines packaging
+            thermometers: parseFloat(values[26]) || 0,       // Thermometers
+            others: parseFloat(values[27]) || 0,             // Others Others
           },
           recycling,
           composted,
