@@ -12,7 +12,7 @@ import {
   Flame,
 } from "lucide-react";
 import DashboardHeader from "@/components/DashboardHeader";
-import StatCard from "@/components/StatCard";
+import StatRow from "@/components/StatRow";
 import DryWasteMethaneSection from "@/components/DryWasteMethaneSection";
 import WasteDataTable from "@/components/WasteDataTable";
 import Footer from "@/components/Footer";
@@ -39,87 +39,20 @@ const Index = () => {
     );
   }
 
-  const stats = [
-    {
-      title: "Total Waste Collected",
-      value: totals.totalWaste,
-      unit: "kg",
-      icon: Trash2,
-      color: "hsl(199, 89%, 48%)",
-      trend: 8,
-    },
-    {
-      title: "Total Dry Waste Collected",
-      value: totalDryWaste,
-      unit: "kg",
-      icon: Package,
-      color: "hsl(45, 93%, 58%)",
-      trend: 5,
-    },
-    {
-      title: "Total Wet Waste Collected",
-      value: totalWetWaste,
-      unit: "kg",
-      icon: Droplets,
-      color: "hsl(160, 84%, 39%)",
-      trend: 6,
-    },
-    {
-      title: "Dry Waste Sent for Recycling",
-      value: totals.recycling,
-      unit: "kg",
-      icon: Recycle,
-      color: "hsl(340, 82%, 52%)",
-      trend: 5,
-    },
-    {
-      title: "Wet Waste Composted",
-      value: totals.composted,
-      unit: "kg",
-      icon: Leaf,
-      color: "hsl(120, 60%, 45%)",
-      trend: 12,
-    },
-    {
-      title: "Residual Waste to Landfill",
-      value: totals.residualToLandfill,
-      unit: "kg",
-      icon: Trash,
-      color: "hsl(0, 65%, 50%)",
-      trend: -3,
-    },
-    {
-      title: "Waste Diverted from Landfill",
-      value: totals.diverted,
-      unit: "kg",
-      icon: ArrowRightFromLine,
-      color: "hsl(220, 70%, 55%)",
-      trend: 7,
-    },
-    {
-      title: "Landfill Diversion Rate",
-      value: totals.landfillDiversionRate,
-      unit: "%",
-      icon: TrendingUp,
-      color: "hsl(170, 70%, 45%)",
-      trend: 6,
-    },
-    {
-      title: "Compost Produced",
-      value: totals.compostProduced,
-      unit: "kg",
-      icon: Sprout,
-      color: "hsl(280, 65%, 60%)",
-      trend: 10,
-    },
-    {
-      title: "Methane Emission Reduction",
-      value: totals.methaneReduction,
-      unit: "kg CO₂e",
-      icon: Flame,
-      color: "hsl(25, 95%, 53%)",
-      trend: 15,
-    },
+  const leftColumnStats = [
+    { title: "Total Waste Collected", value: totals.totalWaste, unit: "kg", icon: Trash2, color: "hsl(199, 89%, 48%)" },
+    { title: "Total Dry Waste Collected", value: totalDryWaste, unit: "kg", icon: Package, color: "hsl(45, 93%, 58%)" },
+    { title: "Total Wet Waste Collected", value: totalWetWaste, unit: "kg", icon: Droplets, color: "hsl(160, 84%, 39%)" },
+    { title: "Dry Waste Sent for Recycling", value: totals.recycling, unit: "kg", icon: Recycle, color: "hsl(340, 82%, 52%)" },
+    { title: "Wet Waste Composted", value: totals.composted, unit: "kg", icon: Leaf, color: "hsl(120, 60%, 45%)" },
+  ];
+
+  const rightColumnStats = [
+    { title: "Residual Waste to Landfill", value: totals.residualToLandfill, unit: "kg", icon: Trash, color: "hsl(0, 65%, 50%)" },
+    { title: "Waste Diverted from Landfill", value: totals.diverted, unit: "kg", icon: ArrowRightFromLine, color: "hsl(220, 70%, 55%)" },
+    { title: "Landfill Diversion Rate", value: totals.landfillDiversionRate, unit: "%", icon: TrendingUp, color: "hsl(170, 70%, 45%)" },
+    { title: "Compost Produced", value: totals.compostProduced, unit: "kg", icon: Sprout, color: "hsl(280, 65%, 60%)" },
+    { title: "Methane Emission Reduction", value: totals.methaneReduction, unit: "kg CO₂e", icon: Flame, color: "hsl(25, 95%, 53%)" },
   ];
 
   return (
@@ -138,10 +71,21 @@ const Index = () => {
         {/* Animated Truck Banner */}
         <AnimatedTruck />
 
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8">
-          {stats.map((stat, index) => (
-            <StatCard key={stat.title} {...stat} delay={index * 0.08} />
-          ))}
+        {/* Two Column Stats Layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
+          {/* Left Column */}
+          <div className="space-y-1">
+            {leftColumnStats.map((stat, index) => (
+              <StatRow key={stat.title} {...stat} delay={index * 0.08} />
+            ))}
+          </div>
+          
+          {/* Right Column */}
+          <div className="space-y-1">
+            {rightColumnStats.map((stat, index) => (
+              <StatRow key={stat.title} {...stat} delay={index * 0.08 + 0.4} />
+            ))}
+          </div>
         </div>
 
         <DryWasteMethaneSection />

@@ -96,7 +96,7 @@ const filterDataByPeriod = (data: WasteDataRow[], period: TimePeriod): WasteData
 const DryWasteMethaneSection = () => {
   const { wasteData } = useWasteData();
   const [methaneTimePeriod, setMethaneTimePeriod] = useState<TimePeriod>("day");
-  const [categoryTimePeriod, setCategoryTimePeriod] = useState<TimePeriod>("year");
+  const [categoryTimePeriod, setCategoryTimePeriod] = useState<TimePeriod>("day");
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
