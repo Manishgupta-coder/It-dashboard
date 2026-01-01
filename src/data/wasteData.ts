@@ -55,6 +55,65 @@ export interface WasteDataRow {
 // Empty default data - real data comes from Google Sheets
 export const wasteData: WasteDataRow[] = [];
 
+export type TimePeriod = "day" | "week" | "month" | "quarter" | "year";
+
+// Parse date in "DD-Mon-YYYY" format
+export const parseDate = (dateStr: string): Date => {
+  const months: { [key: string]: number } = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11,
+  };
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const month = months[parts[1]] ?? 0;
+    const year = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+  }
+  return new Date(dateStr);
+};
+
+export const filterDataByPeriod = (data: WasteDataRow[], period: TimePeriod): WasteDataRow[] => {
+  if (!data || data.length === 0) return [];
+
+  const sortedData = [...data].sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime());
+  const latestDate = parseDate(sortedData[0].date);
+
+  switch (period) {
+    case "day": {
+      return sortedData.slice(0, 1);
+    }
+    case "week": {
+      const weekAgo = new Date(latestDate);
+      weekAgo.setDate(weekAgo.getDate() - 6);
+      return sortedData.filter((row) => parseDate(row.date) >= weekAgo);
+    }
+    case "month": {
+      const monthAgo = new Date(latestDate);
+      monthAgo.setDate(monthAgo.getDate() - 29);
+      return sortedData.filter((row) => parseDate(row.date) >= monthAgo);
+    }
+    case "quarter": {
+      const quarterAgo = new Date(latestDate);
+      quarterAgo.setDate(quarterAgo.getDate() - 89);
+      return sortedData.filter((row) => parseDate(row.date) >= quarterAgo);
+    }
+    case "year":
+    default:
+      return sortedData;
+  }
+};
+
 export const calculateTotals = (data: WasteDataRow[]) => {
   const totals = data.reduce(
     (acc, row) => ({
@@ -123,13 +182,17 @@ export const getPlasticBreakdown = (data: WasteDataRow[]) => {
     { bags: 0, petBottles: 0, hdpeBottles: 0, polythene: 0, others: 0 }
   );
   
-  return [
+  const breakdown = [
     { name: "Bags/Sacks", value: totals.bags, color: "hsl(160, 84%, 39%)" },
     { name: "Pet Bottles", value: totals.petBottles, color: "hsl(199, 89%, 48%)" },
     { name: "HDPE Bottles", value: totals.hdpeBottles, color: "hsl(45, 93%, 58%)" },
     { name: "Polythene", value: totals.polythene, color: "hsl(340, 82%, 52%)" },
     { name: "Others", value: totals.others, color: "hsl(25, 95%, 53%)" },
   ];
+
+  return breakdown.filter(
+    (item, idx, arr) => arr.findIndex((i) => i.name === item.name) === idx
+  );
 };
 
 export const getPaperBreakdown = (data: WasteDataRow[]) => {
@@ -145,7 +208,7 @@ export const getPaperBreakdown = (data: WasteDataRow[]) => {
     { thermocol: 0, newspaper: 0, cartoon: 0, normalPaper: 0, cardboard: 0, others: 0 }
   );
   
-  return [
+  const breakdown = [
     { name: "Thermocol", value: totals.thermocol, color: "hsl(160, 84%, 39%)" },
     { name: "Newspaper", value: totals.newspaper, color: "hsl(45, 93%, 58%)" },
     { name: "Carton", value: totals.cartoon, color: "hsl(35, 90%, 55%)" },
@@ -153,6 +216,8 @@ export const getPaperBreakdown = (data: WasteDataRow[]) => {
     { name: "Cardboard", value: totals.cardboard, color: "hsl(40, 80%, 50%)" },
     { name: "Others", value: totals.others, color: "hsl(25, 95%, 53%)" },
   ];
+
+  return breakdown.filter((item, idx, arr) => arr.findIndex((i) => i.name === item.name) === idx);
 };
 
 export const getGlassBreakdown = (data: WasteDataRow[]) => {
@@ -164,10 +229,12 @@ export const getGlassBreakdown = (data: WasteDataRow[]) => {
     { whiteGrades: 0, others: 0 }
   );
   
-  return [
+  const breakdown = [
     { name: "White Grades", value: totals.whiteGrades, color: "hsl(199, 89%, 48%)" },
     { name: "Others", value: totals.others, color: "hsl(25, 95%, 53%)" },
   ];
+
+  return breakdown.filter((item, idx, arr) => arr.findIndex((i) => i.name === item.name) === idx);
 };
 
 export const getMetalBreakdown = (data: WasteDataRow[]) => {
@@ -180,11 +247,13 @@ export const getMetalBreakdown = (data: WasteDataRow[]) => {
     { aluminum: 0, foodPacking: 0, others: 0 }
   );
   
-  return [
+  const breakdown = [
     { name: "Aluminum Cans", value: totals.aluminum, color: "hsl(220, 70%, 55%)" },
     { name: "Food Packing Container", value: totals.foodPacking, color: "hsl(210, 60%, 50%)" },
     { name: "Others", value: totals.others, color: "hsl(25, 95%, 53%)" },
   ];
+
+  return breakdown.filter((item, idx, arr) => arr.findIndex((i) => i.name === item.name) === idx);
 };
 
 export const getEwasteBreakdown = (data: WasteDataRow[]) => {
@@ -198,12 +267,14 @@ export const getEwasteBreakdown = (data: WasteDataRow[]) => {
     { batteries: 0, charger: 0, lighting: 0, others: 0 }
   );
   
-  return [
+  const breakdown = [
     { name: "Batteries", value: totals.batteries, color: "hsl(280, 65%, 60%)" },
     { name: "Charger", value: totals.charger, color: "hsl(270, 60%, 55%)" },
     { name: "Lighting", value: totals.lighting, color: "hsl(290, 55%, 50%)" },
     { name: "Others", value: totals.others, color: "hsl(25, 95%, 53%)" },
   ];
+
+  return breakdown.filter((item, idx, arr) => arr.findIndex((i) => i.name === item.name) === idx);
 };
 
 export const getOthersBreakdown = (data: WasteDataRow[]) => {
@@ -217,12 +288,14 @@ export const getOthersBreakdown = (data: WasteDataRow[]) => {
     { expiredMedicines: 0, medicinesPackaging: 0, thermometers: 0, others: 0 }
   );
   
-  return [
+  const breakdown = [
     { name: "Expired Medicines", value: totals.expiredMedicines, color: "hsl(160, 60%, 45%)" },
     { name: "Medicines Packaging", value: totals.medicinesPackaging, color: "hsl(150, 55%, 40%)" },
     { name: "Thermometers", value: totals.thermometers, color: "hsl(170, 50%, 50%)" },
     { name: "Others", value: totals.others, color: "hsl(25, 95%, 53%)" },
   ];
+
+  return breakdown.filter((item, idx, arr) => arr.findIndex((i) => i.name === item.name) === idx);
 };
 
 export const getChartData = (data: WasteDataRow[]) => {

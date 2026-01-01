@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import {
   Trash2,
   Recycle,
@@ -23,10 +24,27 @@ import Footer from "@/components/Footer";
 import AnimatedTruck from "@/components/AnimatedTruck";
 import { calculateTotals } from "@/data/wasteData";
 import { useWasteData } from "@/context/WasteDataContext";
+import { useEffect, useRef, useState } from "react";
 
 const Index = () => {
   const { wasteData, isLoading } = useWasteData();
   const totals = calculateTotals(wasteData);
+
+  // Refs kept for potential future use (analytics, etc.)
+  const overviewRef = useRef<HTMLDivElement | null>(null);
+  const breakdownRef = useRef<HTMLDivElement | null>(null);
+  const piesRef = useRef<HTMLDivElement | null>(null);
+
+  const [forceReveal, setForceReveal] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const open = (e as CustomEvent).detail;
+      setForceReveal(Boolean(open));
+    };
+    window.addEventListener("report-generating", handler as EventListener);
+    return () => window.removeEventListener("report-generating", handler as EventListener);
+  }, []);
 
   // Calculate total dry and wet waste from data
   const totalDryWaste = wasteData.reduce((sum, row) => sum + row.dryWaste, 0);
@@ -69,14 +87,24 @@ const Index = () => {
         <div className="absolute top-1/2 right-10 w-64 h-64 bg-chart-glass/6 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <main className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+      <main
+        id="dashboard-capture"
+        className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 bg-background"
+      >
         <DashboardHeader />
         
         {/* Animated Truck Banner */}
         <AnimatedTruck />
 
         {/* Two Column Stats Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
+        <motion.div
+          initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+          animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
+          whileInView={forceReveal ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          viewport={forceReveal ? undefined : { once: true, amount: 0.2 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8"
+        >
           {/* Left Column */}
           <div className="space-y-1">
             {leftColumnStats.map((stat, index) => (
@@ -90,20 +118,54 @@ const Index = () => {
               <StatRow key={stat.title} {...stat} delay={index * 0.08 + 0.4} />
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        <DryWasteMethaneSection />
+        <motion.div
+          initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+          animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
+          whileInView={forceReveal ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          viewport={forceReveal ? undefined : { once: true, amount: 0.2 }}
+        >
+          <DryWasteMethaneSection />
+        </motion.div>
 
-        <WasteOverviewChart />
+        <motion.div
+          ref={overviewRef}
+          initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+          animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
+          whileInView={forceReveal ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          viewport={forceReveal ? undefined : { once: true, amount: 0.2 }}
+        >
+          <WasteOverviewChart />
+        </motion.div>
 
         <div className="my-6 sm:my-8" />
 
-        <BreakdownChartsGrid />
+        <motion.div
+          ref={breakdownRef}
+          initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+          animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
+          whileInView={forceReveal ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          viewport={forceReveal ? undefined : { once: true, amount: 0.2 }}
+        >
+          <BreakdownChartsGrid />
+        </motion.div>
 
         <div className="my-6 sm:my-8" />
 
         {/* Two Column Layout: Data Table + Pie Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <motion.div
+          ref={piesRef}
+          initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+          animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
+          whileInView={forceReveal ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          viewport={forceReveal ? undefined : { once: true, amount: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
+        >
           {/* Left Column: Waste Data Table */}
           <WasteDataTable />
           
@@ -112,7 +174,7 @@ const Index = () => {
             <WasteCollectionPieChart />
             <LandfillMetricsPieChart />
           </div>
-        </div>
+        </motion.div>
       </main>
 
       <Footer />

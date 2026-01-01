@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useWasteData } from "@/context/WasteDataContext";
-import { calculateTotals } from "@/data/wasteData";
+import { calculateTotals, filterDataByPeriod, TimePeriod } from "@/data/wasteData";
 import { Recycle, Leaf, Package } from "lucide-react";
 
 const COLORS = [
@@ -26,7 +27,19 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 const WasteCollectionPieChart = () => {
   const { wasteData } = useWasteData();
-  const totals = calculateTotals(wasteData);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const period = (e as CustomEvent<TimePeriod>).detail;
+      if (period) setTimePeriod(period);
+    };
+    window.addEventListener("report-period-selected", handler as EventListener);
+    return () => window.removeEventListener("report-period-selected", handler as EventListener);
+  }, []);
+
+  const filteredData = useMemo(() => filterDataByPeriod(wasteData, timePeriod), [wasteData, timePeriod]);
+  const totals = calculateTotals(filteredData);
 
   const chartData = [
     { name: "Total Waste", value: totals.totalWaste, color: COLORS[0], icon: Package },

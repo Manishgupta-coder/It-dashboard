@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart,
@@ -100,6 +100,19 @@ const DryWasteMethaneSection = () => {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  // Sync both charts when a global report period is selected from the header dialog
+  useEffect(() => {
+    const handleReportPeriod = (event: Event) => {
+      const detail = (event as CustomEvent<TimePeriod>).detail;
+      if (!detail) return;
+      setCategoryTimePeriod(detail);
+      setMethaneTimePeriod(detail);
+    };
+
+    window.addEventListener("report-period-selected", handleReportPeriod);
+    return () => window.removeEventListener("report-period-selected", handleReportPeriod);
+  }, []);
+
   const calculateMethaneReduction = (totalWaste: number) => {
     return Math.round(((totalWaste / 1000) * (0.6 * 0.5)) * 28);
   };
@@ -159,11 +172,16 @@ const DryWasteMethaneSection = () => {
     }
   }, [selectedCategory, filteredCategoryData]);
 
+  // Filter data for methane chart based on selected period
+  const filteredMethaneData = useMemo(() => {
+    return filterDataByPeriod(wasteData, methaneTimePeriod);
+  }, [wasteData, methaneTimePeriod]);
+
   // Prepare methane chart data
   const methaneChartData = useMemo(() => {
-    if (!wasteData || wasteData.length === 0) return [];
+    if (!filteredMethaneData || filteredMethaneData.length === 0) return [];
 
-    const sortedData = [...wasteData].sort((a, b) => 
+    const sortedData = [...filteredMethaneData].sort((a, b) => 
       parseDate(a.date).getTime() - parseDate(b.date).getTime()
     );
 

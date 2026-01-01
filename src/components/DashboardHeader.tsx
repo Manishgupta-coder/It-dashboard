@@ -17,10 +17,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DashboardHeader = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportPeriod, setReportPeriod] = useState<"day" | "week" | "month" | "quarter" | "year">("day");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,16 +53,16 @@ const DashboardHeader = () => {
         className="flex items-center justify-center mb-4 w-full"
       >
         <div className="flex items-center justify-between w-full bg-white rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6">
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[15%]">
             <img src={SBIFoundation} alt="SBI Foundation" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[28%]">
             <img src={SBIConserw} alt="SBI CONSERW" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[28%]">
             <img src={Ayodhya} alt="Ayodhya" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[28%]">
             <img src={Chintan} alt="Chintan" className="h-full w-auto object-contain" />
           </div>
         </div>
@@ -71,11 +80,11 @@ const DashboardHeader = () => {
           alt="SBIF CONSERW: Waste No More in Ayodhya" 
           className="w-full h-auto object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-sky-600/70 via-sky-500/60 to-teal-500/70 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white drop-shadow-lg tracking-wide mb-2 sm:mb-3 text-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-sky-600/30 via-sky-500/60 to-teal-500/40 flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 min-h-[180px] sm:min-h-[220px]">
+          <h2 className="text-base sm:text-2xl md:text-3xl lg:text-4xl font-black text-white drop-shadow-lg tracking-wide mb-2 sm:mb-3 text-center leading-tight px-3 py-1.5 rounded-md ">
             SBIF CONSERW: WASTE NO MORE IN AYODHYA
           </h2>
-          <p className="text-xs sm:text-sm md:text-base text-white/90 italic max-w-4xl mx-auto leading-relaxed text-center">
+          <p className="text-[11px] sm:text-sm md:text-base text-white/90 italic max-w-4xl mx-auto leading-snug text-center px-3 py-1.5 rounded-md  break-words">
             Supported by Ayodhya Nagar Nigam, Chintan Environmental Research and Action Group, and SBI Foundation under their Conservation through Sustainable Engagements, Restoration and Wildlife Protection (CONSERW) program
           </p>
         </div>
@@ -164,62 +173,146 @@ metal, and e-waste in the Ayodhya region.`;
             </Dialog>
 
             {/* Report Download Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={isGeneratingReport}
-              onClick={async () => {
-                const element = document.body;
-                try {
-                  setIsGeneratingReport(true);
-                  const canvas = await html2canvas(element, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    scrollY: -window.scrollY,
-                    windowHeight: document.documentElement.scrollHeight,
-                    height: document.documentElement.scrollHeight,
-                  });
-                  const imgData = canvas.toDataURL("image/png");
-                  const pdf = new jsPDF({
-                    orientation: "portrait",
-                    unit: "mm",
-                    format: "a4",
-                  });
-                  const pageWidth = pdf.internal.pageSize.getWidth();
-                  const pageHeight = pdf.internal.pageSize.getHeight();
-                  let imgWidth = pageWidth;
-                  let imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                  if (imgHeight > pageHeight) {
-                    imgHeight = pageHeight;
-                    imgWidth = (canvas.width * imgHeight) / canvas.height;
-                  }
-
-                  const x = (pageWidth - imgWidth) / 2;
-                  pdf.addImage(imgData, "PNG", x, 0, imgWidth, imgHeight, undefined, "FAST");
-                  pdf.save(`waste-management-report-${format(new Date(), "dd-MMM-yyyy")}.pdf`);
-                } catch (error) {
-                  console.error('Error generating report:', error);
-                } finally {
-                  setIsGeneratingReport(false);
-                }
+            <Dialog
+              open={reportDialogOpen}
+              onOpenChange={(open) => {
+                setReportDialogOpen(open);
+                // Pause truck animation while dialog is open, resume on close
+                window.dispatchEvent(new CustomEvent("report-dialog-toggle", { detail: open }));
               }}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent-foreground text-xs sm:text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isGeneratingReport ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span>Report</span>
-                  <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                </>
-              )}
-            </motion.button>
+              <DialogTrigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isGeneratingReport}
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent-foreground text-xs sm:text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isGeneratingReport ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                      <span>Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span>Report</span>
+                      <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    </>
+                  )}
+                </motion.button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Select period</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Select value={reportPeriod} onValueChange={(val) => setReportPeriod(val as typeof reportPeriod)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Choose period" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="day">Day</SelectItem>
+                      <SelectItem value="week">Week</SelectItem>
+                      <SelectItem value="month">Month</SelectItem>
+                      <SelectItem value="quarter">Quarter</SelectItem>
+                      <SelectItem value="year">Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    disabled={isGeneratingReport}
+                    onClick={async () => {
+                      setIsGeneratingReport(true);
+                      // Broadcast selected period so all widgets sync before capture
+                      window.dispatchEvent(new CustomEvent("report-period-selected", { detail: reportPeriod }));
+                      // Close the dialog so the overlay is not captured
+                      setReportDialogOpen(false);
+                      // Wait for close animation to finish and UI to settle
+                      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+                      await new Promise((r) => setTimeout(r, 180));
+                      // Force all sections to render/animate for capture and allow charts to size
+                      window.dispatchEvent(new CustomEvent("report-generating", { detail: true }));
+                      await new Promise((r) => setTimeout(r, 320));
+                      window.dispatchEvent(new Event("resize"));
+                      window.scrollTo({ top: 0, behavior: "auto" });
+                      document.documentElement.scrollTop = 0;
+                      document.body.scrollTop = 0;
+                      // Capture the full dashboard area to avoid clipping after animations
+                      const element =
+                        (document.getElementById("dashboard-capture") as HTMLElement) ||
+                        (document.getElementById("root") as HTMLElement) ||
+                        document.documentElement;
+                      const captureHeight = element.scrollHeight;
+                      const captureWidth = element.scrollWidth;
+                      try {
+                        // Extra delay to allow charts/animations to render
+                        await new Promise((r) => setTimeout(r, 600));
+                        const canvas = await html2canvas(element, {
+                          scale: 2,
+                          useCORS: true,
+                          allowTaint: true,
+                          scrollX: 0,
+                          scrollY: 0, // capture from absolute top
+                          x: 0,
+                          y: 0,
+                          backgroundColor: getComputedStyle(document.body).backgroundColor || "#f9fafb",
+                          width: captureWidth,
+                          height: captureHeight,
+                          windowWidth: document.documentElement.scrollWidth,
+                          windowHeight: document.documentElement.scrollHeight,
+                        });
+                        const imgData = canvas.toDataURL("image/png");
+                        const pdf = new jsPDF({
+                          orientation: "portrait",
+                          unit: "mm",
+                          format: "a4",
+                        });
+                        const pageWidth = pdf.internal.pageSize.getWidth();
+                        const pageHeight = pdf.internal.pageSize.getHeight();
+                        const imgWidth = pageWidth;
+                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                        let heightLeft = imgHeight;
+                        let position = 0;
+
+                        // Add first page
+                        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
+                        heightLeft -= pageHeight;
+                        position = -pageHeight;
+
+                        // Add extra pages if needed
+                        while (heightLeft > 0) {
+                          pdf.addPage();
+                          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
+                          heightLeft -= pageHeight;
+                          position -= pageHeight;
+                        }
+                        pdf.save(`waste-management-report-${reportPeriod}-${format(new Date(), "dd-MMM-yyyy")}.pdf`);
+                      } catch (error) {
+                        console.error('Error generating report:', error);
+                      } finally {
+                        setIsGeneratingReport(false);
+                        setReportDialogOpen(false);
+                      }
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isGeneratingReport ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        <span>Download PDF</span>
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

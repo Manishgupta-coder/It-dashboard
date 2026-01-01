@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -11,9 +11,16 @@ import {
   Legend,
   Cell,
 } from "recharts";
-import { ChevronDown, BarChart3 } from "lucide-react";
-import { getChartData } from "@/data/wasteData";
+import { BarChart3 } from "lucide-react";
+import { getChartData, filterDataByPeriod, TimePeriod } from "@/data/wasteData";
 import { useWasteData } from "@/context/WasteDataContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const categories = [
   { key: "plastic", label: "Plastic", color: "hsl(340, 82%, 52%)", icon: "🧴" },
@@ -78,46 +85,20 @@ const WasteOverviewChart = () => {
   const [activeCategories, setActiveCategories] = useState<string[]>(
     categories.map((c) => c.key)
   );
-  const [timePeriod, setTimePeriod] = useState("day");
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
 
-  const chartData = useMemo(() => {
-    const data = getChartData(wasteData);
-    
-    if (timePeriod === "day") {
-      return data;
-    }
-    
-    const groupedData: { [key: string]: any } = {};
-    
-    data.forEach((row, index) => {
-      let groupKey = "";
-      
-      if (timePeriod === "week") {
-        groupKey = `Week ${Math.floor(index / 7) + 1}`;
-      } else if (timePeriod === "month") {
-        groupKey = "Nov 2025";
-      } else if (timePeriod === "quarter") {
-        groupKey = "Q4 2025";
-      } else if (timePeriod === "year") {
-        groupKey = "2025";
-      }
-      
-      if (!groupedData[groupKey]) {
-        groupedData[groupKey] = { date: groupKey, plastic: 0, paper: 0, glass: 0, metal: 0, ewaste: 0, others: 0, count: 0 };
-      }
-      
-      groupedData[groupKey].plastic += row.plastic;
-      groupedData[groupKey].paper += row.paper;
-      groupedData[groupKey].glass += row.glass;
-      groupedData[groupKey].metal += row.metal;
-      groupedData[groupKey].ewaste += row.ewaste;
-      groupedData[groupKey].others += row.others;
-      groupedData[groupKey].count += 1;
-    });
-    
-    return Object.values(groupedData);
-  }, [timePeriod, wasteData]);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const period = (e as CustomEvent<TimePeriod>).detail;
+      if (period) setTimePeriod(period);
+    };
+    window.addEventListener("report-period-selected", handler as EventListener);
+    return () => window.removeEventListener("report-period-selected", handler as EventListener);
+  }, []);
+
+  const filteredData = useMemo(() => filterDataByPeriod(wasteData, timePeriod), [wasteData, timePeriod]);
+
+  const chartData = useMemo(() => getChartData(filteredData), [filteredData]);
 
   const toggleCategory = (key: string) => {
     setActiveCategories((prev) =>
@@ -203,37 +184,18 @@ const WasteOverviewChart = () => {
         </div>
         
         {/* Time Period Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-primary/10 to-accent/10 border border-border hover:from-primary/20 hover:to-accent/20 transition-all"
-          >
-            <span className="text-foreground">{timePeriods.find((t) => t.key === timePeriod)?.label}</span>
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          </button>
-          {showDropdown && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute top-full mt-2 right-0 bg-card border border-border rounded-xl shadow-xl z-50 min-w-[120px] overflow-hidden"
-            >
-              {timePeriods.map((period) => (
-                <button
-                  key={period.key}
-                  onClick={() => {
-                    setTimePeriod(period.key);
-                    setShowDropdown(false);
-                  }}
-                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-secondary/50 transition-colors ${
-                    timePeriod === period.key ? "bg-primary/10 text-primary font-medium" : ""
-                  }`}
-                >
-                  {period.label}
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </div>
+        <Select value={timePeriod} onValueChange={(val) => setTimePeriod(val)}>
+          <SelectTrigger className="w-32 bg-gradient-to-r from-primary/10 to-accent/10 border-border text-sm font-medium">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {timePeriods.map((period) => (
+              <SelectItem key={period.key} value={period.key}>
+                {period.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Category Summary Cards */}

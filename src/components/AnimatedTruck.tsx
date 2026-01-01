@@ -1,6 +1,69 @@
-import { motion } from "framer-motion";
+import { motion, useAnimationControls } from "framer-motion";
+import { useEffect } from "react";
 
 const AnimatedTruck = () => {
+  const cloudControls = useAnimationControls();
+  const roadControls = useAnimationControls();
+  const truckControls = useAnimationControls();
+  const treeControls = useAnimationControls();
+  const sunControls = useAnimationControls();
+  const birdControls = useAnimationControls();
+
+  const startAnimations = () => {
+    cloudControls.start((i) => ({
+      x: [-20, 20, -20],
+      transition: { duration: 8, repeat: Infinity, ease: "easeInOut", delay: i * 1.5 },
+    }));
+    roadControls.start((i) => ({
+      x: [50, -150],
+      transition: { duration: 2, repeat: Infinity, ease: "linear", delay: i * 0.15 },
+    }));
+    truckControls.start({
+      x: ["-100px", "calc(100vw + 100px)"],
+      transition: { duration: 15, repeat: Infinity, ease: "linear", repeatType: "loop" },
+    });
+    treeControls.start((i) => ({
+      x: ["0%", "-100%"],
+      transition: { duration: 6, repeat: Infinity, ease: "linear", repeatType: "loop", delay: i * 0.1 },
+    }));
+    sunControls.start({
+      rotate: 360,
+      transition: { duration: 30, repeat: Infinity, ease: "linear" },
+    });
+    birdControls.start((i) => ({
+      x: [0, 30, 0],
+      y: [0, -5, 0],
+      transition: { duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 },
+    }));
+  };
+
+  const stopAnimations = () => {
+    cloudControls.stop();
+    roadControls.stop();
+    truckControls.stop();
+    treeControls.stop();
+    sunControls.stop();
+    birdControls.stop();
+  };
+
+  useEffect(() => {
+    startAnimations();
+    const handler = (e: Event) => {
+      const open = (e as CustomEvent).detail;
+      if (open) {
+        stopAnimations();
+      } else {
+        startAnimations();
+      }
+    };
+    window.addEventListener("report-dialog-toggle", handler as EventListener);
+    return () => {
+      window.removeEventListener("report-dialog-toggle", handler as EventListener);
+      stopAnimations();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="relative w-full h-24 overflow-hidden bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 rounded-xl mb-6">
       {/* Sky gradient */}

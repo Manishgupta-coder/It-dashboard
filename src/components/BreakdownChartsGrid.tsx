@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -57,6 +57,15 @@ const BreakdownChartsGrid = () => {
   const { wasteData } = useWasteData();
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const period = (e as CustomEvent<TimePeriod>).detail;
+      if (period) setTimePeriod(period);
+    };
+    window.addEventListener("report-period-selected", handler as EventListener);
+    return () => window.removeEventListener("report-period-selected", handler as EventListener);
+  }, []);
+
   const filteredData = useMemo(() => {
     if (!wasteData || wasteData.length === 0) return [];
     
@@ -95,6 +104,14 @@ const BreakdownChartsGrid = () => {
   }, [wasteData, timePeriod]);
 
   const chartData = useMemo(() => {
+    const addPercents = (data: { name: string; value: number; color?: string }[]) => {
+      const total = data.reduce((sum, item) => sum + item.value, 0);
+      return data.map((item) => ({
+        ...item,
+        percent: total > 0 ? (item.value / total) * 100 : 0,
+      }));
+    };
+
     const plasticData = getPlasticBreakdown(filteredData);
     const paperData = getPaperBreakdown(filteredData);
     const glassData = getGlassBreakdown(filteredData);
@@ -102,26 +119,13 @@ const BreakdownChartsGrid = () => {
     const ewasteData = getEwasteBreakdown(filteredData);
     const othersData = getOthersBreakdown(filteredData);
 
-    // Calculate Others total to add to each breakdown
-    const othersTotal = filteredData.reduce((sum, row) => {
-      return sum + row.others.expiredMedicines + row.others.medicinesPackaging + row.others.thermometers;
-    }, 0);
-
-    // Add Others to each breakdown except the Others chart itself
-    const addOthersToData = (data: { name: string; value: number; color?: string }[]) => {
-      return [
-        ...data,
-        { name: "Others", value: othersTotal, color: "hsl(25, 95%, 53%)" }
-      ];
-    };
-
     return [
-      { title: "Plastic", data: addOthersToData(plasticData) },
-      { title: "Paper", data: addOthersToData(paperData) },
-      { title: "Glass", data: addOthersToData(glassData) },
-      { title: "Metal", data: addOthersToData(metalData) },
-      { title: "E-waste", data: addOthersToData(ewasteData) },
-      { title: "Others", data: othersData },
+      { title: "Plastic", data: addPercents(plasticData) },
+      { title: "Paper", data: addPercents(paperData) },
+      { title: "Glass", data: addPercents(glassData) },
+      { title: "Metal", data: addPercents(metalData) },
+      { title: "E-waste", data: addPercents(ewasteData) },
+      { title: "Others", data: addPercents(othersData) },
     ];
   }, [filteredData]);
 
@@ -130,7 +134,7 @@ const BreakdownChartsGrid = () => {
       return (
         <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-xl">
           <p className="text-sm font-medium text-foreground">
-            {payload[0].name}: {payload[0].value} kg
+            {payload[0].name}: {payload[0].payload.value.toLocaleString()} kg ({payload[0].value.toFixed(1)}%)
           </p>
         </div>
       );
@@ -186,9 +190,11 @@ const BreakdownChartsGrid = () => {
                     innerRadius={25}
                     outerRadius={50}
                     paddingAngle={2}
-                    dataKey="value"
-                    animationDuration={800}
-                    animationBegin={index * 100}
+                    dataKey="percent"
+                    isAnimationActive
+                    animationDuration={1000}
+                    animationBegin={index * 120}
+                    key={`${chart.title}-${timePeriod}`}
                   >
                     {chart.data.map((_, idx) => (
                       <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
