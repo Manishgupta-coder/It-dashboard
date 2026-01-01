@@ -53,16 +53,16 @@ const DashboardHeader = () => {
         className="flex items-center justify-center mb-4 w-full"
       >
         <div className="flex items-center justify-between w-full bg-white rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6">
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[15%]">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[19%]">
             <img src={SBIFoundation} alt="SBI Foundation" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[28%]">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[27%]">
             <img src={SBIConserw} alt="SBI CONSERW" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[28%]">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[27%]">
             <img src={Ayodhya} alt="Ayodhya" className="h-full w-auto object-contain" />
           </div>
-          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[28%]">
+          <div className="flex items-center justify-center h-10 sm:h-14 md:h-16 lg:h-20 w-[27%]">
             <img src={Chintan} alt="Chintan" className="h-full w-auto object-contain" />
           </div>
         </div>
@@ -239,55 +239,53 @@ metal, and e-waste in the Ayodhya region.`;
                       window.scrollTo({ top: 0, behavior: "auto" });
                       document.documentElement.scrollTop = 0;
                       document.body.scrollTop = 0;
-                      // Capture the full dashboard area to avoid clipping after animations
-                      const element =
-                        (document.getElementById("dashboard-capture") as HTMLElement) ||
-                        (document.getElementById("root") as HTMLElement) ||
-                        document.documentElement;
-                      const captureHeight = element.scrollHeight;
-                      const captureWidth = element.scrollWidth;
+                      // Capture all report sections and stitch into one tall single-page PDF
+                      const sectionNodes = Array.from(
+                        document.querySelectorAll<HTMLElement>("[data-report-section]")
+                      );
+                      const targets = sectionNodes.length > 0 ? sectionNodes : [document.documentElement];
                       try {
                         // Extra delay to allow charts/animations to render
                         await new Promise((r) => setTimeout(r, 600));
-                        const canvas = await html2canvas(element, {
-                          scale: 2,
-                          useCORS: true,
-                          allowTaint: true,
-                          scrollX: 0,
-                          scrollY: 0, // capture from absolute top
-                          x: 0,
-                          y: 0,
-                          backgroundColor: getComputedStyle(document.body).backgroundColor || "#f9fafb",
-                          width: captureWidth,
-                          height: captureHeight,
-                          windowWidth: document.documentElement.scrollWidth,
-                          windowHeight: document.documentElement.scrollHeight,
-                        });
-                        const imgData = canvas.toDataURL("image/png");
-                        const pdf = new jsPDF({
-                          orientation: "portrait",
-                          unit: "mm",
-                          format: "a4",
-                        });
-                        const pageWidth = pdf.internal.pageSize.getWidth();
-                        const pageHeight = pdf.internal.pageSize.getHeight();
-                        const imgWidth = pageWidth;
-                        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                        let heightLeft = imgHeight;
-                        let position = 0;
 
-                        // Add first page
-                        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
-                        heightLeft -= pageHeight;
-                        position = -pageHeight;
-
-                        // Add extra pages if needed
-                        while (heightLeft > 0) {
-                          pdf.addPage();
-                          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight, undefined, "FAST");
-                          heightLeft -= pageHeight;
-                          position -= pageHeight;
+                        const canvases: HTMLCanvasElement[] = [];
+                        for (const el of targets) {
+                          const canvas = await html2canvas(el, {
+                            scale: 1.25,
+                            useCORS: true,
+                            allowTaint: true,
+                            scrollX: 0,
+                            scrollY: 0,
+                            x: 0,
+                            y: 0,
+                            backgroundColor: getComputedStyle(document.body).backgroundColor || "#f9fafb",
+                            width: el.scrollWidth,
+                            height: el.scrollHeight,
+                            windowWidth: el.scrollWidth,
+                            windowHeight: el.scrollHeight,
+                          });
+                          canvases.push(canvas);
                         }
+
+                        const totalHeight = canvases.reduce((sum, c) => sum + c.height, 0);
+                        const maxWidth = canvases.reduce((max, c) => Math.max(max, c.width), 0);
+                        const padding = 80; // add margins so content is visually centered
+                        const pageWidth = maxWidth + padding * 2;
+                        const pageHeight = totalHeight + padding * 2;
+                        const pdf = new jsPDF({
+                          orientation: pageWidth >= pageHeight ? "landscape" : "portrait",
+                          unit: "px",
+                          format: [pageWidth, pageHeight],
+                        });
+
+                        let yCursor = padding;
+                        canvases.forEach((canvas) => {
+                          const imgData = canvas.toDataURL("image/png");
+                          const x = (pageWidth - canvas.width) / 2; // center horizontally
+                          pdf.addImage(imgData, "PNG", x, yCursor, canvas.width, canvas.height, undefined, "FAST");
+                          yCursor += canvas.height;
+                        });
+
                         pdf.save(`waste-management-report-${reportPeriod}-${format(new Date(), "dd-MMM-yyyy")}.pdf`);
                       } catch (error) {
                         console.error('Error generating report:', error);

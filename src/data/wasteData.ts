@@ -125,19 +125,34 @@ export const calculateTotals = (data: WasteDataRow[]) => {
       metal: acc.metal + Object.values(row.metal).reduce((a, b) => a + b, 0),
       ewaste: acc.ewaste + Object.values(row.ewaste).reduce((a, b) => a + b, 0),
       others: acc.others + Object.values(row.others).reduce((a, b) => a + b, 0),
+      divertedFromLandfill: acc.divertedFromLandfill + row.divertedFromLandfill,
       totalWasteSum: acc.totalWasteSum + row.totalWaste,
       dryWasteSum: acc.dryWasteSum + row.dryWaste,
       wetWasteSum: acc.wetWasteSum + row.wetWaste,
       count: acc.count + 1,
     }),
-    { recycling: 0, composted: 0, paper: 0, glass: 0, plastic: 0, metal: 0, ewaste: 0, others: 0, totalWasteSum: 0, dryWasteSum: 0, wetWasteSum: 0, count: 0 }
+    {
+      recycling: 0,
+      composted: 0,
+      paper: 0,
+      glass: 0,
+      plastic: 0,
+      metal: 0,
+      ewaste: 0,
+      others: 0,
+      divertedFromLandfill: 0,
+      totalWasteSum: 0,
+      dryWasteSum: 0,
+      wetWasteSum: 0,
+      count: 0,
+    }
   );
 
   // Total Waste Collected from data
   const totalWaste = totals.totalWasteSum;
   
-  // Waste Diverted from Landfill = Dry Waste Sent for Recycling + Wet Waste Composted
-  const diverted = totals.recycling + totals.composted;
+  // Waste Diverted from Landfill = reported divertedFromLandfill
+  const diverted = totals.divertedFromLandfill;
   
   // Residual Waste to Landfill = Total Waste - Waste Diverted
   const residualToLandfill = totalWaste - diverted;

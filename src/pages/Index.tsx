@@ -52,7 +52,7 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
           <p className="text-muted-foreground">Loading waste data...</p>
@@ -78,9 +78,9 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen ">
       {/* Hero gradient background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none hero-gradient" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" />
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -91,13 +91,18 @@ const Index = () => {
         id="dashboard-capture"
         className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 bg-background"
       >
-        <DashboardHeader />
+        <div data-report-section="header">
+          <DashboardHeader />
+        </div>
         
         {/* Animated Truck Banner */}
-        <AnimatedTruck />
+        <div data-report-section="hero">
+          <AnimatedTruck />
+        </div>
 
         {/* Two Column Stats Layout */}
         <motion.div
+          data-report-section="summary-stats"
           initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
           whileInView={forceReveal ? undefined : { opacity: 1, y: 0 }}
@@ -121,6 +126,7 @@ const Index = () => {
         </motion.div>
 
         <motion.div
+          data-report-section="dry-waste-methane"
           initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
           animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
           whileInView={forceReveal ? undefined : { opacity: 1, y: 0 }}
@@ -131,6 +137,7 @@ const Index = () => {
         </motion.div>
 
         <motion.div
+          data-report-section="waste-category-trends"
           ref={overviewRef}
           initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
           animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
@@ -144,6 +151,7 @@ const Index = () => {
         <div className="my-6 sm:my-8" />
 
         <motion.div
+          data-report-section="breakdown-charts"
           ref={breakdownRef}
           initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
           animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
@@ -158,6 +166,7 @@ const Index = () => {
 
         {/* Two Column Layout: Data Table + Pie Charts */}
         <motion.div
+          data-report-section="tables-and-pies"
           ref={piesRef}
           initial={forceReveal ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
           animate={forceReveal ? { opacity: 1, y: 0 } : undefined}
@@ -177,7 +186,9 @@ const Index = () => {
         </motion.div>
       </main>
 
-      <Footer />
+      <div data-report-section="footer">
+        <Footer />
+      </div>
     </div>
   );
 };
